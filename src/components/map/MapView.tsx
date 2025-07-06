@@ -1,14 +1,52 @@
 
-import { useMemo } from 'react';
-import { Category, SelectedPlace } from '@/types';
+import { useMemo, useState } from 'react';
+import { Category, SelectedPlace, Place } from '@/types';
+import { Button } from '@/components/ui/button';
+
+// 미리 정의된 장소 목록
+const PREDEFINED_PLACES: Place[] = [
+  // 음식점 카테고리용
+  { id: '1', name: '맛있는 파스타', description: '이탈리안 레스토랑', x: 20, y: 30, categoryId: 'food' },
+  { id: '2', name: '전통 한정식', description: '한국 전통 요리', x: 60, y: 20, categoryId: 'food' },
+  { id: '3', name: '스시 오마카세', description: '고급 일식당', x: 40, y: 70, categoryId: 'food' },
+  { id: '4', name: '브런치 카페', description: '아침 식사 전문', x: 80, y: 50, categoryId: 'food' },
+  
+  // 카페 카테고리용
+  { id: '5', name: '아늑한 서재', description: '독서하기 좋은 카페', x: 30, y: 40, categoryId: 'cafe' },
+  { id: '6', name: '루프탑 카페', description: '도시 전망이 멋진 곳', x: 70, y: 30, categoryId: 'cafe' },
+  { id: '7', name: '디저트 하우스', description: '수제 케이크 전문', x: 50, y: 60, categoryId: 'cafe' },
+  
+  // 관광지 카테고리용
+  { id: '8', name: '역사 박물관', description: '지역 역사를 알 수 있는 곳', x: 25, y: 55, categoryId: 'tourist' },
+  { id: '9', name: '예술 갤러리', description: '현대 미술 전시', x: 65, y: 45, categoryId: 'tourist' },
+  { id: '10', name: '전망대', description: '시내가 한눈에 보이는 곳', x: 45, y: 25, categoryId: 'tourist' },
+  { id: '11', name: '공원', description: '산책하기 좋은 녹지', x: 75, y: 65, categoryId: 'tourist' },
+  
+  // 쇼핑 카테고리용
+  { id: '12', name: '대형 백화점', description: '다양한 브랜드가 있는 곳', x: 55, y: 35, categoryId: 'shopping' },
+  { id: '13', name: '전통 시장', description: '지역 특산품을 살 수 있는 곳', x: 35, y: 65, categoryId: 'shopping' },
+  { id: '14', name: '아울렛', description: '할인 쇼핑몰', x: 85, y: 40, categoryId: 'shopping' },
+  
+  // 병원/약국 카테고리용
+  { id: '15', name: '종합병원', description: '24시간 응급실 운영', x: 40, y: 45, categoryId: 'medical' },
+  { id: '16', name: '동네 약국', description: '처방전 조제', x: 60, y: 55, categoryId: 'medical' },
+  
+  // 주유소 카테고리용
+  { id: '17', name: 'GS25 주유소', description: '편의점 함께 운영', x: 20, y: 70, categoryId: 'gas' },
+  { id: '18', name: '셀프 주유소', description: '저렴한 기름값', x: 80, y: 25, categoryId: 'gas' },
+];
 
 interface MapViewProps {
   places: SelectedPlace[];
   categories: Category[];
   activeCategory: string | null;
+  onPlaceSelect: (place: Place) => void;
+  isPlaceSelected: (placeId: string) => boolean;
 }
 
-export const MapView = ({ places, categories, activeCategory }: MapViewProps) => {
+export const MapView = ({ places, categories, activeCategory, onPlaceSelect, isPlaceSelected }: MapViewProps) => {
+  const [clickedPlace, setClickedPlace] = useState<Place | null>(null);
+
   const sortedPlaces = useMemo(() => {
     return [...places].sort((a, b) => a.order - b.order);
   }, [places]);
@@ -18,6 +56,13 @@ export const MapView = ({ places, categories, activeCategory }: MapViewProps) =>
     return sortedPlaces.filter(place => place.categoryId === activeCategory);
   }, [sortedPlaces, activeCategory]);
 
+  const availablePlaces = useMemo(() => {
+    return PREDEFINED_PLACES.filter(place => {
+      if (activeCategory && place.categoryId !== activeCategory) return false;
+      return categories.some(cat => cat.id === place.categoryId);
+    });
+  }, [categories, activeCategory]);
+
   const getCategoryColor = (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
     return category?.color || '#3b82f6';
@@ -26,6 +71,19 @@ export const MapView = ({ places, categories, activeCategory }: MapViewProps) =>
   const getCategoryIcon = (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
     return category?.icon || '📍';
+  };
+
+  const handleMarkerClick = (place: Place) => {
+    setClickedPlace(place);
+  };
+
+  const handleSelectPlace = (place: Place) => {
+    onPlaceSelect(place);
+    setClickedPlace(null);
+  };
+
+  const handleCloseInfo = () => {
+    setClickedPlace(null);
   };
 
   return (
@@ -115,7 +173,34 @@ export const MapView = ({ places, categories, activeCategory }: MapViewProps) =>
         </svg>
       )}
 
-      {/* Place Markers */}
+      {/* Available Place Markers (not selected) */}
+      {availablePlaces.map((place) => {
+        const isSelected = isPlaceSelected(place.id);
+        if (isSelected) return null;
+
+        return (
+          <div
+            key={`available-${place.id}`}
+            className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 cursor-pointer"
+            style={{
+              left: `${place.x}%`,
+              top: `${place.y}%`,
+            }}
+            onClick={() => handleMarkerClick(place)}
+          >
+            <div
+              className="relative flex items-center justify-center w-10 h-10 rounded-full shadow-lg border-2 border-white opacity-70 hover:opacity-100"
+              style={{ backgroundColor: getCategoryColor(place.categoryId) }}
+            >
+              <span className="text-white text-sm">
+                {getCategoryIcon(place.categoryId)}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Selected Place Markers */}
       {filteredPlaces.map((place, index) => (
         <div
           key={place.id}
@@ -125,9 +210,9 @@ export const MapView = ({ places, categories, activeCategory }: MapViewProps) =>
             top: `${place.y}%`,
           }}
         >
-          {/* Marker */}
+          {/* Selected Marker */}
           <div
-            className="relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg cursor-pointer border-4 border-white"
+            className="relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg cursor-pointer border-4 border-white ring-2 ring-yellow-400"
             style={{ backgroundColor: getCategoryColor(place.categoryId) }}
           >
             <span className="text-white text-lg font-bold">
@@ -151,6 +236,32 @@ export const MapView = ({ places, categories, activeCategory }: MapViewProps) =>
         </div>
       ))}
 
+      {/* Place Info Card */}
+      {clickedPlace && (
+        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-4 max-w-sm z-20">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="font-semibold text-gray-800">{clickedPlace.name}</h3>
+            <button
+              onClick={handleCloseInfo}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          <p className="text-sm text-gray-600 mb-3">{clickedPlace.description}</p>
+          <div className="text-xs text-gray-500 mb-4">
+            위치: {clickedPlace.x}%, {clickedPlace.y}%
+          </div>
+          <Button
+            onClick={() => handleSelectPlace(clickedPlace)}
+            className="w-full"
+            size="sm"
+          >
+            이 장소 선택하기
+          </Button>
+        </div>
+      )}
+
       {/* Legend */}
       <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-xs">
         <h3 className="font-semibold text-gray-800 mb-2">범례</h3>
@@ -160,8 +271,12 @@ export const MapView = ({ places, categories, activeCategory }: MapViewProps) =>
             <span>동선 (방문 순서)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-            <span>마커 (선택된 장소)</span>
+            <div className="w-3 h-3 bg-yellow-400 rounded-full ring-1 ring-yellow-400"></div>
+            <span>선택된 장소</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-gray-400 rounded-full opacity-70"></div>
+            <span>선택 가능한 장소</span>
           </div>
         </div>
       </div>

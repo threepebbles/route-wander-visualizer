@@ -23,3 +23,8 @@ export interface MapPosition {
   x: number;
   y: number;
 }
+
+export interface CategorySelection {
+  categoryId: string;
+  placeId: string;
+}

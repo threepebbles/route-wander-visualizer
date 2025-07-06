@@ -7,7 +7,7 @@ import { PlaceSelectionModal } from '@/components/place/PlaceSelectionModal';
 import { CategoryModal } from '@/components/category/CategoryModal';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { Category, Place, SelectedPlace } from '@/types';
+import { Category, Place, SelectedPlace, CategorySelection } from '@/types';
 
 const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -16,6 +16,7 @@ const Index = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showPlaceModal, setShowPlaceModal] = useState(false);
   const [selectedCategoryForPlaces, setSelectedCategoryForPlaces] = useState<string | null>(null);
+  const [categorySelections, setCategorySelections] = useState<CategorySelection[]>([]);
 
   const handleAddCategory = (category: Omit<Category, 'id'>) => {
     const newCategory: Category = {
@@ -26,13 +27,33 @@ const Index = () => {
   };
 
   const handleSelectPlace = (place: Place, categoryId: string) => {
+    // 기존 선택된 장소가 있으면 제거
+    const existingSelection = categorySelections.find(sel => sel.categoryId === categoryId);
+    let newSelections = categorySelections;
+    
+    if (existingSelection) {
+      newSelections = categorySelections.filter(sel => sel.categoryId !== categoryId);
+      setSelectedPlaces(prev => prev.filter(p => p.id !== existingSelection.placeId));
+    }
+
+    // 새로운 선택 추가
+    const newSelection: CategorySelection = {
+      categoryId,
+      placeId: place.id
+    };
+    setCategorySelections([...newSelections, newSelection]);
+
     const selectedPlace: SelectedPlace = {
       ...place,
       categoryId,
       order: selectedPlaces.length,
     };
-    setSelectedPlaces([...selectedPlaces, selectedPlace]);
+    setSelectedPlaces(prev => [...prev, selectedPlace]);
     setShowPlaceModal(false);
+  };
+
+  const handleSelectPlaceFromMap = (place: Place) => {
+    handleSelectPlace(place, place.categoryId);
   };
 
   const handleReorderPlaces = (reorderedPlaces: SelectedPlace[]) => {
@@ -44,16 +65,27 @@ const Index = () => {
   };
 
   const handleRemovePlace = (placeId: string) => {
+    const placeToRemove = selectedPlaces.find(p => p.id === placeId);
+    if (placeToRemove) {
+      setCategorySelections(prev => 
+        prev.filter(sel => sel.placeId !== placeId)
+      );
+    }
     setSelectedPlaces(selectedPlaces.filter(place => place.id !== placeId));
   };
 
   const handleClearAll = () => {
     setSelectedPlaces([]);
+    setCategorySelections([]);
   };
 
   const openPlaceSelection = (categoryId: string) => {
     setSelectedCategoryForPlaces(categoryId);
     setShowPlaceModal(true);
+  };
+
+  const isPlaceSelected = (placeId: string) => {
+    return categorySelections.some(sel => sel.placeId === placeId);
   };
 
   return (
@@ -98,6 +130,8 @@ const Index = () => {
           places={selectedPlaces}
           categories={categories}
           activeCategory={activeCategory}
+          onPlaceSelect={handleSelectPlaceFromMap}
+          isPlaceSelected={isPlaceSelected}
         />
       </div>
 
