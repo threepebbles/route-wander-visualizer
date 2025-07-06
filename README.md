@@ -1,3 +1,5 @@
+[배포 링크](https://route-wander-visualizer.lovable.app/)
+
 ## 페르소나
 
 ### **민서현 27세 - 효율을 굉장히 중시하는 대학원생**
