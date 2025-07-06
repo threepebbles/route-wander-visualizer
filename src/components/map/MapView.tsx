@@ -37,31 +37,32 @@ const PREDEFINED_PLACES: Place[] = [
 ];
 
 interface MapViewProps {
-  places: SelectedPlace[];
+  addedPlaces: Place[];
+  selectedPlaces: SelectedPlace[];
   categories: Category[];
   activeCategory: string | null;
-  onPlaceSelect: (place: Place) => void;
+  onPlaceSelect: (place: Place, categoryId: string) => void;
   isPlaceSelected: (placeId: string) => boolean;
 }
 
-export const MapView = ({ places, categories, activeCategory, onPlaceSelect, isPlaceSelected }: MapViewProps) => {
+export const MapView = ({ 
+  addedPlaces, 
+  selectedPlaces, 
+  categories, 
+  activeCategory, 
+  onPlaceSelect, 
+  isPlaceSelected 
+}: MapViewProps) => {
   const [clickedPlace, setClickedPlace] = useState<Place | null>(null);
 
   const sortedPlaces = useMemo(() => {
-    return [...places].sort((a, b) => a.order - b.order);
-  }, [places]);
+    return [...selectedPlaces].sort((a, b) => a.order - b.order);
+  }, [selectedPlaces]);
 
-  const filteredPlaces = useMemo(() => {
+  const filteredSelectedPlaces = useMemo(() => {
     if (!activeCategory) return sortedPlaces;
     return sortedPlaces.filter(place => place.categoryId === activeCategory);
   }, [sortedPlaces, activeCategory]);
-
-  const availablePlaces = useMemo(() => {
-    return PREDEFINED_PLACES.filter(place => {
-      if (activeCategory && place.categoryId !== activeCategory) return false;
-      return categories.some(cat => cat.id === place.categoryId);
-    });
-  }, [categories, activeCategory]);
 
   const getCategoryColor = (categoryId: string) => {
     const category = categories.find(cat => cat.id === categoryId);
@@ -78,12 +79,17 @@ export const MapView = ({ places, categories, activeCategory, onPlaceSelect, isP
   };
 
   const handleSelectPlace = (place: Place) => {
-    onPlaceSelect(place);
+    onPlaceSelect(place, place.categoryId);
     setClickedPlace(null);
   };
 
   const handleCloseInfo = () => {
     setClickedPlace(null);
+  };
+
+  const getMarkerOpacity = (categoryId: string) => {
+    if (!activeCategory) return 1;
+    return activeCategory === categoryId ? 1 : 0.3;
   };
 
   return (
@@ -173,23 +179,24 @@ export const MapView = ({ places, categories, activeCategory, onPlaceSelect, isP
         </svg>
       )}
 
-      {/* Available Place Markers (not selected) */}
-      {availablePlaces.map((place) => {
+      {/* Added Place Markers (not selected) */}
+      {addedPlaces.map((place) => {
         const isSelected = isPlaceSelected(place.id);
         if (isSelected) return null;
 
         return (
           <div
-            key={`available-${place.id}`}
+            key={`added-${place.id}`}
             className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 cursor-pointer"
             style={{
               left: `${place.x}%`,
               top: `${place.y}%`,
+              opacity: getMarkerOpacity(place.categoryId),
             }}
             onClick={() => handleMarkerClick(place)}
           >
             <div
-              className="relative flex items-center justify-center w-10 h-10 rounded-full shadow-lg border-2 border-white opacity-70 hover:opacity-100"
+              className="relative flex items-center justify-center w-10 h-10 rounded-full shadow-lg border-2 border-white"
               style={{ backgroundColor: getCategoryColor(place.categoryId) }}
             >
               <span className="text-white text-sm">
@@ -201,7 +208,7 @@ export const MapView = ({ places, categories, activeCategory, onPlaceSelect, isP
       })}
 
       {/* Selected Place Markers */}
-      {filteredPlaces.map((place, index) => (
+      {filteredSelectedPlaces.map((place, index) => (
         <div
           key={place.id}
           className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110"
@@ -275,8 +282,8 @@ export const MapView = ({ places, categories, activeCategory, onPlaceSelect, isP
             <span>선택된 장소</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-400 rounded-full opacity-70"></div>
-            <span>선택 가능한 장소</span>
+            <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+            <span>추가된 장소</span>
           </div>
         </div>
       </div>

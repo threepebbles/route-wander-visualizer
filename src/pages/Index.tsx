@@ -11,6 +11,7 @@ import { Category, Place, SelectedPlace, CategorySelection } from '@/types';
 
 const Index = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [addedPlaces, setAddedPlaces] = useState<Place[]>([]); // 추가된 모든 장소들
   const [selectedPlaces, setSelectedPlaces] = useState<SelectedPlace[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -26,6 +27,19 @@ const Index = () => {
     setCategories([...categories, newCategory]);
   };
 
+  // 카테고리에 장소 추가 (여러 개 가능)
+  const handleAddPlace = (place: Place, categoryId: string) => {
+    const placeWithCategory = { ...place, categoryId };
+    
+    // 이미 추가된 장소인지 확인
+    const isAlreadyAdded = addedPlaces.some(p => p.id === place.id && p.categoryId === categoryId);
+    if (!isAlreadyAdded) {
+      setAddedPlaces(prev => [...prev, placeWithCategory]);
+    }
+    setShowPlaceModal(false);
+  };
+
+  // 카테고리에서 장소 선택 (하나만 가능)
   const handleSelectPlace = (place: Place, categoryId: string) => {
     // 기존 선택된 장소가 있으면 제거
     const existingSelection = categorySelections.find(sel => sel.categoryId === categoryId);
@@ -49,11 +63,6 @@ const Index = () => {
       order: selectedPlaces.length,
     };
     setSelectedPlaces(prev => [...prev, selectedPlace]);
-    setShowPlaceModal(false);
-  };
-
-  const handleSelectPlaceFromMap = (place: Place) => {
-    handleSelectPlace(place, place.categoryId);
   };
 
   const handleReorderPlaces = (reorderedPlaces: SelectedPlace[]) => {
@@ -127,10 +136,11 @@ const Index = () => {
       {/* Main Map Area */}
       <div className="flex-1">
         <MapView
-          places={selectedPlaces}
+          addedPlaces={addedPlaces}
+          selectedPlaces={selectedPlaces}
           categories={categories}
           activeCategory={activeCategory}
-          onPlaceSelect={handleSelectPlaceFromMap}
+          onPlaceSelect={handleSelectPlace}
           isPlaceSelected={isPlaceSelected}
         />
       </div>
@@ -146,7 +156,7 @@ const Index = () => {
         isOpen={showPlaceModal}
         onClose={() => setShowPlaceModal(false)}
         categoryId={selectedCategoryForPlaces}
-        onSelectPlace={handleSelectPlace}
+        onSelectPlace={handleAddPlace}
       />
     </div>
   );
