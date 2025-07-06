@@ -1,3 +1,5 @@
+# 동선 플래너
+
 [배포 링크](https://route-wander-visualizer.lovable.app/)
 
 ## 페르소나
