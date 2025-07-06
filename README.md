@@ -1,73 +1,46 @@
-# Welcome to your Lovable project
+## 페르소나
 
-## Project info
+### **민서현 27세 - 효율을 굉장히 중시하는 대학원생**
 
-**URL**: https://lovable.dev/projects/e2905621-ff42-491d-9b65-b2cd9c230658
+- 목표 : 여러 데이트 코스 동선을 비교해본 뒤, 가장 마음에 드는 동선을 선택하고 싶다.
+- 니즈
+    - 가능한 모든 경우의 수의 동선을 확인하고 싶음
+    - 밥집, 카페, 술집처럼 카테고리 별로 하나씩 장소를 등록 기능
+    - 카테고리 별로 방문할 장소를 1개씩 최종 선택
+    - 이 조합으로 짠 동선이 괜찮은지 미리 시각적으로 확인하고 싶음
 
-## How can I edit this code?
+### 정유정 25세 - 100만 팔로워 인플루언서
 
-There are several ways of editing your application.
+- 목표 : 친구들과의 약속을 정할 때, 카톡으로 받은 여러 장소 링크들을 지도에서 한눈에 보고, 직접 클릭하면서 이동 동선을 쉽게 확인하고 싶다.
+- 니즈
+    - 카카오톡 대화방에 흩어진 목적지 후보들을 앱에 모아 정리해두고 싶음
+    - 목적지 후보군을 그룹핑해서 친구들과 함께 목적지를 결정하고 싶음
+    - 목적지 별로 친구들의 선호도를 알고 싶음
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e2905621-ff42-491d-9b65-b2cd9c230658) and start prompting.
+## 사용자 스토리
 
-Changes made via Lovable will be committed automatically to this repo.
+### **시나리오 1: 주말에 소개팅이 있는 민서현 군**
 
-**Use your preferred IDE**
+- 주말 데이트를 위해 인스타그램에서 맛집, 카페, 술집을 검색한다.
+- 맛집 3곳(양식, 베트남, 한식), 카페 4곳, 술집 5곳을 후보로 모은다.
+- ‘동선 플래너’ 앱에 접속하여 맛집, 카페, 술집 카테고리를 생성한다.
+- 각 카테고리에 찾은 장소들을 등록해둔다.
+- 다음 날 소개팅 장소에 도착한다.
+- 민서현 군이 “근처에 양식 맛집이 있는데, 양식 어떠세요?”라고 제안한다.
+- 상대방이 “점심에 양식을 먹어서요... 한식은 어때요?”라고 말한다.
+- 미리 등록해둔 한식 맛집을 앱에서 클릭하여 즉시 동선을 변경한다.
+- 상대방은 민서현 군의 빠른 대응과 계획된 동선에 감탄한다.
+- 두 사람은 좋은 분위기 속에 데이트를 마무리한다.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 시나리오 2: 주말에 친구들과 당일치기 여행을 가는 정유정 양
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/e2905621-ff42-491d-9b65-b2cd9c230658) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- 다음 주 주말에 친구들과 여행을 가기로 약속한다.
+- 여행 장소 후보들을 카카오톡 단체 채팅방에 공유한다.
+- 채팅방에 흩어진 링크들로 인해 확인이 번거롭다고 느낀다.
+- ‘동선 플래너’ 앱에 접속하여 모임을 생성하고 친구들에게 링크를 공유한다.
+- 친구들이 함께 앱에 접속해, 각자 가고 싶은 장소를 카테고리별로 저장한다.
+- 등록된 장소들을 지도에서 한눈에 확인하고, 클릭하여 자세한 정보를 본다.
+- 정유정 양과 친구들은 후보지 중 마음에 드는 장소들에 하트 버튼을 누른다.
+- 정유정 양과 친구들은 후보들의 선호도, 동선을 쉽게 비교하면서 목적지를 결정한다.
+- 완성된 동선을 따라 정유정 양과 친구들은 즐겁게 여행을 즐긴다.
