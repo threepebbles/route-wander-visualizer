@@ -19,7 +19,7 @@ jobs:
           if [ "$LABEL_NAME" = "BE" ]; then
             WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_BACKEND }}"
             MESSAGE="PR #$PR_NUMBER: $PR_TITLE\n$PR_URL"
-          elif [ "$LABEL_NAME" = "BE" ]; then
+          elif [ "$LABEL_NAME" = "FE" ]; then
             WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_FRONTEND }}"
             MESSAGE="PR #$PR_NUMBER: $PR_TITLE\n$PR_URL"
           else
