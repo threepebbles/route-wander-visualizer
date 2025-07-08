@@ -29,20 +29,30 @@ jobs:
             case "$LABEL" in
               "BE")
                 WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_BACKEND }}"
-                MESSAGE="$PR_URL"
                 ;;
               "FE")
                 WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_FRONTEND }}"
-                MESSAGE="$PR_URL"
                 ;;
               *)
                 continue
                 ;;
             esac
+            MESSAGE="$PR_URL"
 
+            if [ -z "$WEBHOOK_URL" ]; then
+              echo "Webhook URL not set for label $LABEL. Skipping."
+              continue
+            fi
+          
+            if [ -z "$MESSAGE" ]; then
+              echo "Message is empty. Skipping."
+              continue
+            fi
+          
             PAYLOAD=$(jq -n --arg content "$MESSAGE" '{content: $content}')
-            echo "====WEBHOOK_URL===="
-            echo "$WEBHOOK_URL"
+          
+            echo "Payload to send:"
+            echo "$PAYLOAD"
             
             curl --fail -H "Content-Type: application/json" \
               -X POST \
