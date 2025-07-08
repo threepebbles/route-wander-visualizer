@@ -2,7 +2,7 @@ name: PR Label-based Discord Notification
 
 on:
   pull_request:
-    types: [labeled, synchronize]
+    types: [opened, labeled, synchronize]
 
 jobs:
   notify-discord:
@@ -40,7 +40,7 @@ jobs:
                 ;;
             esac
 
-            curl -H "Content-Type: application/json" \
+            curl --fail -H "Content-Type: application/json" \
               -X POST \
               -d "{\"content\": \"$MESSAGE\"}" \
               "$WEBHOOK_URL"
