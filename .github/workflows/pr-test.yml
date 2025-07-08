@@ -2,8 +2,7 @@ name: PR Label-based Discord Notification
 
 on:
   pull_request:
-    types:
-      - labeled
+    types: [labeled, synchronize]
 
 jobs:
   notify-discord:
@@ -11,23 +10,29 @@ jobs:
     steps:
       - name: Notify Discord based on PR label
         run: |
-          LABEL_NAME="${{ github.event.label.name }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          if [ "$LABEL_NAME" = "BE" ]; then
-            WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_BACKEND }}"
-            MESSAGE="PR #$PR_NUMBER: $PR_TITLE\n$PR_URL"
-          elif [ "$LABEL_NAME" = "FE" ]; then
-            WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_FRONTEND }}"
-            MESSAGE="PR #$PR_NUMBER: $PR_TITLE\n$PR_URL"
-          else
-            echo "Label $LABEL_NAME not mapped to a Discord channel. Skipping."
-            exit 0
-          fi
+          LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
 
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"$MESSAGE\"}" \
-               "$WEBHOOK_URL"
+          for LABEL in $LABELS; do
+            case "$LABEL" in
+              "BE")
+                WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_BACKEND }}"
+                MESSAGE="PR #$PR_NUMBER: $PR_TITLE\n$PR_URL"
+                ;;
+              "FE")
+                WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_FRONTEND }}"
+                MESSAGE="PR #$PR_NUMBER: $PR_TITLE\n$PR_URL"
+                ;;
+              *)
+                continue
+                ;;
+            esac
+
+            curl -H "Content-Type: application/json" \
+              -X POST \
+              -d "{\"content\": \"$MESSAGE\"}" \
+              "$WEBHOOK_URL"
+          done
