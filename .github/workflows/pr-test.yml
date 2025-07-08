@@ -14,6 +14,11 @@ jobs:
       PR_LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
 
     steps:
+      - name: Print PR Labels JSON
+        run: |
+          echo "=== Raw PR_LABELS_JSON ==="
+          echo "$PR_LABELS_JSON"
+    
       - name: Notify Discord based on PR label
         run: |
           LABELS=$(echo "$PR_LABELS_JSON" | jq -r '.[].name')
