@@ -41,6 +41,8 @@ jobs:
             esac
 
             PAYLOAD=$(jq -n --arg content "$MESSAGE" '{content: $content}')
+            echo "====WEBHOOK_URL===="
+            echo "$WEBHOOK_URL"
             
             curl --fail -H "Content-Type: application/json" \
               -X POST \
