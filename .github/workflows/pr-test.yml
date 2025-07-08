@@ -17,7 +17,9 @@ jobs:
       - name: Print PR Labels JSON
         run: |
           echo "=== Raw PR_LABELS_JSON ==="
-          echo "$PR_LABELS_JSON"
+          
+          LABELS=$(echo "$PR_LABELS_JSON" | jq -r '.[].name')
+          echo $LABELS
     
       - name: Notify Discord based on PR label
         run: |
