@@ -13,8 +13,9 @@ jobs:
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_URL="${{ github.event.pull_request.html_url }}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
 
-          LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name')
+          LABELS=$(echo "$PR_LABELS_JSON" | jq -r '.[].name')
 
           for LABEL in $LABELS; do
             case "$LABEL" in
