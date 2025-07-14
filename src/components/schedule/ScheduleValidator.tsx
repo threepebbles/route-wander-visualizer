@@ -26,6 +26,7 @@ export const ScheduleValidator = ({ selectedPlaces, startTime, endTime }: Schedu
         const openTime = parseTime(place.openTime);
         const closeTime = parseTime(place.closeTime);
         
+        // 현재 시간이 영업시간 범위 내에 있는지 확인
         if (currentTime < openTime || currentTime > closeTime) {
           issues.push({
             type: 'closed',
@@ -39,32 +40,33 @@ export const ScheduleValidator = ({ selectedPlaces, startTime, endTime }: Schedu
       if (place.breakTimeStart && place.breakTimeEnd) {
         const breakStart = parseTime(place.breakTimeStart);
         const breakEnd = parseTime(place.breakTimeEnd);
+        const stayDuration = place.stayDuration || 60;
         
-        if (currentTime >= breakStart && currentTime <= breakEnd) {
+        // 체류 시간 동안 브레이크 타임과 겹치는지 확인
+        if (currentTime < breakEnd && (currentTime + stayDuration) > breakStart) {
           issues.push({
             type: 'break_time',
             placeIndex: index,
-            message: `${place.name}의 브레이크 타임(${place.breakTimeStart}-${place.breakTimeEnd})에 해당합니다.`
+            message: `${place.name}의 브레이크 타임(${place.breakTimeStart}-${place.breakTimeEnd})과 겹칩니다.`
           });
         }
       }
 
-      // 체류 시간 추가
-      if (place.stayDuration !== undefined) {
-        currentTime += place.stayDuration;
-      } else {
-        currentTime += 60; // 기본 1시간
-      }
+      // 체류 시간 추가 (현재 장소에서의 체류)
+      const stayDuration = place.stayDuration || 60; // 기본 1시간
+      currentTime += stayDuration;
 
-      // 이동 시간 추가 (기본 30분)
+      // 다음 장소로의 이동 시간 추가 (마지막 장소가 아닌 경우)
       if (index < selectedPlaces.length - 1) {
-        currentTime += 30;
+        const nextPlace = selectedPlaces[index + 1];
+        const travelTime = calculateTravelTime(place, nextPlace);
+        currentTime += travelTime;
       }
     });
 
-    // 전체 시간 체크
-    const exceededMinutes = Math.round(currentTime) - Math.round(endTimeMinutes);
-    if (exceededMinutes > 0) {
+    // 전체 시간이 종료 시간을 초과하는지 확인
+    if (currentTime > endTimeMinutes) {
+      const exceededMinutes = currentTime - endTimeMinutes;
       issues.push({
         type: 'insufficient_time',
         placeIndex: -1,
@@ -81,6 +83,15 @@ export const ScheduleValidator = ({ selectedPlaces, startTime, endTime }: Schedu
   const parseTime = (timeString: string): number => {
     const [hours, minutes] = timeString.split(':').map(Number);
     return hours * 60 + minutes;
+  };
+
+  // 두 지점 간의 이동 시간을 계산하는 함수
+  const calculateTravelTime = (place1: SelectedPlace, place2: SelectedPlace): number => {
+    const distance = Math.sqrt(
+      Math.pow(place1.x - place2.x, 2) + Math.pow(place1.y - place2.y, 2)
+    );
+    // 거리에 따른 이동 시간 (분 단위) - 최소 5분, 최대 60분
+    return Math.max(5, Math.min(60, Math.round(distance * 0.8)));
   };
 
   const validation = validateSchedule();

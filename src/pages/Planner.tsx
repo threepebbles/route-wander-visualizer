@@ -15,6 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Plus, ArrowLeft, Clock } from 'lucide-react';
 import { Purpose, Place, SelectedPlace, PurposeSelection } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { TimeInput } from '@/components/ui/time-input';
 
 const Planner = () => {
   const navigate = useNavigate();
@@ -192,24 +193,20 @@ const Planner = () => {
                     <Label htmlFor="start-time" className="text-xs text-muted-foreground">
                       시작 시간
                     </Label>
-                    <Input
-                      id="start-time"
-                      type="time"
+                    <TimeInput
                       value={routieStartTime}
-                      onChange={e => setRoutieStartTime(e.target.value)}
-                      className="text-sm"
+                      onChange={setRoutieStartTime}
+                      placeholder="시작 시간"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="end-time" className="text-xs text-muted-foreground">
                       종료 시간
                     </Label>
-                    <Input
-                      id="end-time"
-                      type="time"
+                    <TimeInput
                       value={routieEndTime}
-                      onChange={e => setRoutieEndTime(e.target.value)}
-                      className="text-sm"
+                      onChange={setRoutieEndTime}
+                      placeholder="종료 시간"
                     />
                   </div>
                 </div>

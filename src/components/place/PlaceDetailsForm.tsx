@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TimeInput } from '@/components/ui/time-input';
 
 interface PlaceDetailsFormProps {
   onDetailsChange: (details: {
@@ -57,7 +58,6 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
     setTimeout(handleChange, 0);
   };
 
-  // 브레이크 타임 토글이 off로 바뀌면 값 초기화
   const handleBreakTimeToggle = (checked: boolean) => {
     setBreakTimeEnabled(checked);
     if (!checked) {
@@ -97,24 +97,18 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="openTime">영업 시작</Label>
-            <Input
-              id="openTime"
-              type="time"
+            <TimeInput
               value={openTime}
-              onChange={(e) => {
-                setOpenTime(e.target.value);
-              }}
+              onChange={setOpenTime}
+              placeholder="영업 시작 시간"
             />
           </div>
           <div>
             <Label htmlFor="closeTime">영업 종료</Label>
-            <Input
-              id="closeTime"
-              type="time"
+            <TimeInput
               value={closeTime}
-              onChange={(e) => {
-                setCloseTime(e.target.value);
-              }}
+              onChange={setCloseTime}
+              placeholder="영업 종료 시간"
             />
           </div>
         </div>
@@ -130,22 +124,16 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
             <Label htmlFor="break-time-switch" className="text-xs">브레이크 타임 입력</Label>
           </div>
           <div className="grid grid-cols-2 gap-2 mt-2">
-            <Input
-              type="time"
-              placeholder="시작"
+            <TimeInput
               value={breakTimeStart}
-              onChange={(e) => {
-                setBreakTimeStart(e.target.value);
-              }}
+              onChange={setBreakTimeStart}
+              placeholder="시작 시간"
               disabled={!breakTimeEnabled}
             />
-            <Input
-              type="time"
-              placeholder="종료"
+            <TimeInput
               value={breakTimeEnd}
-              onChange={(e) => {
-                setBreakTimeEnd(e.target.value);
-              }}
+              onChange={setBreakTimeEnd}
+              placeholder="종료 시간"
               disabled={!breakTimeEnabled}
             />
           </div>
