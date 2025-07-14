@@ -6,11 +6,10 @@ import { PurposeSidebar } from '@/components/sidebar/PurposeSidebar';
 import { RouteList } from '@/components/route/RouteList';
 import { PlaceSelectionModal } from '@/components/place/PlaceSelectionModal';
 import { CategoryModal } from '@/components/category/CategoryModal';
-import { RoutieCreator } from '@/components/routie/RoutieCreator';
 import { ScheduleValidator } from '@/components/schedule/ScheduleValidator';
 import { Button } from '@/components/ui/button';
 import { Plus, ArrowLeft } from 'lucide-react';
-import { Purpose, Place, SelectedPlace, PurposeSelection, Routie } from '@/types';
+import { Purpose, Place, SelectedPlace, PurposeSelection } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 const Planner = () => {
@@ -98,25 +97,6 @@ const Planner = () => {
     return purposeSelections.some(sel => sel.placeId === placeId);
   };
 
-  const handleSaveRoutie = (routieData: Omit<Routie, 'id' | 'createdAt'>) => {
-    const newRoutie: Routie = {
-      ...routieData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    
-    // 실제로는 서버에 저장하거나 로컬 스토리지에 저장
-    console.log('루티 저장됨:', newRoutie);
-    
-    toast({
-      title: "루티가 저장되었습니다!",
-      description: `"${newRoutie.name}" 루티가 성공적으로 생성되었습니다.`,
-    });
-
-    // 홈으로 돌아가기
-    navigate('/');
-  };
-
   const handleGoHome = () => {
     navigate('/');
   };
@@ -171,11 +151,12 @@ const Planner = () => {
             endTime={routieEndTime}
           />
 
-          <RoutieCreator
+          {/* RoutieCreator 삭제됨 */}
+          {/* <RoutieCreator
             selectedPlaces={selectedPlaces}
             purposes={purposes}
             onSaveRoutie={handleSaveRoutie}
-          />
+          /> */}
         </div>
       </div>
 
