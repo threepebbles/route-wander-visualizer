@@ -23,14 +23,13 @@ export const MapView = ({
 }: MapViewProps) => {
   const [clickedPlace, setClickedPlace] = useState<Place | null>(null);
 
-  const sortedPlaces = useMemo(() => {
-    return [...selectedPlaces].sort((a, b) => a.order - b.order);
-  }, [selectedPlaces]);
+  // 방문 순서(목적+장소 순서) 그대로 사용
+  const sortedPlaces = selectedPlaces;
 
   const filteredSelectedPlaces = useMemo(() => {
-    if (!activePurpose) return sortedPlaces;
-    return sortedPlaces.filter(place => place.purposeId === activePurpose);
-  }, [sortedPlaces, activePurpose]);
+    if (!activePurpose) return selectedPlaces;
+    return selectedPlaces.filter(place => place.purposeId === activePurpose);
+  }, [selectedPlaces, activePurpose]);
 
   const getPurposeColor = (purposeId: string) => {
     const purpose = purposes.find(cat => cat.id === purposeId);
@@ -185,44 +184,47 @@ export const MapView = ({
       })}
 
       {/* Selected Place Markers */}
-      {filteredSelectedPlaces.map((place, index) => (
-        <div
-          key={place.id}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 cursor-pointer"
-          style={{
-            left: `${place.x}%`,
-            top: `${place.y}%`,
-          }}
-          onClick={() => handleMarkerClick(place)}
-        >
+      {filteredSelectedPlaces.map((place) => {
+        // 전체 방문 순서에서의 index를 찾음
+        const visitIndex = sortedPlaces.findIndex(p => p.id === place.id);
+        return (
           <div
-            className="relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg border-4 border-white ring-2 ring-yellow-400"
-            style={{ backgroundColor: getPurposeColor(place.purposeId) }}
+            key={place.id}
+            className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 cursor-pointer"
+            style={{
+              left: `${place.x}%`,
+              top: `${place.y}%`,
+            }}
+            onClick={() => handleMarkerClick(place)}
           >
-            <span className="text-white text-lg font-bold">
-              {getPurposeIcon(place.purposeId)}
-            </span>
-            
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-              {place.order + 1}
+            <div
+              className="relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg border-4 border-white ring-2 ring-yellow-400"
+              style={{ backgroundColor: getPurposeColor(place.purposeId) }}
+            >
+              <span className="text-white text-lg font-bold">
+                {getPurposeIcon(place.purposeId)}
+              </span>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                {visitIndex + 1}
+              </div>
             </div>
-          </div>
 
-          <div className="absolute top-14 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-3 min-w-48 opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-            <h3 className="font-semibold text-gray-800">{place.name}</h3>
-            <p className="text-sm text-gray-600 mt-1">{place.description}</p>
-            <div className="text-xs text-gray-500 mt-2">
-              순서: {place.order + 1}번째 방문
-              {place.stayDuration && (
-                <div>체류시간: {place.stayDuration}분</div>
-              )}
-              {place.openTime && place.closeTime && (
-                <div>영업시간: {place.openTime}-{place.closeTime}</div>
-              )}
+            <div className="absolute top-14 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-3 min-w-48 opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+              <h3 className="font-semibold text-gray-800">{place.name}</h3>
+              <p className="text-sm text-gray-600 mt-1">{place.description}</p>
+              <div className="text-xs text-gray-500 mt-2">
+                순서: {place.order + 1}번째 방문
+                {place.stayDuration && (
+                  <div>체류시간: {place.stayDuration}분</div>
+                )}
+                {place.openTime && place.closeTime && (
+                  <div>영업시간: {place.openTime}-{place.closeTime}</div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Place Info Card */}
       {clickedPlace && (

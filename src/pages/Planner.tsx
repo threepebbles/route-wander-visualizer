@@ -128,6 +128,16 @@ const Planner = () => {
     navigate('/');
   };
 
+  // 목적 순서 변경 핸들러
+  const handlePurposeReorder = (newPurposes: Purpose[]) => {
+    setPurposes(newPurposes);
+  };
+
+  // 방문 순서: 목적 순서대로, 각 목적별 selectedPlaces 순서대로 정렬
+  const orderedPlaces = purposes.flatMap(purpose =>
+    selectedPlaces.filter(place => place.purposeId === purpose.id)
+  );
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -173,20 +183,21 @@ const Planner = () => {
           activePurpose={activePurpose}
           onPurposeSelect={setActivePurpose}
           onPlaceSelect={openPlaceSelection}
+          onPurposeReorder={handlePurposeReorder}
         />
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <RouteList
-            places={selectedPlaces}
+            places={orderedPlaces}
             purposes={purposes}
-            onReorder={handleReorderPlaces}
+            onReorder={() => {}} // 드래그 비활성화
             onRemove={handleRemovePlace}
             onClearAll={handleClearAll}
           />
 
           {scheduleValidationEnabled && (
             <ScheduleValidator
-              selectedPlaces={selectedPlaces}
+              selectedPlaces={orderedPlaces}
               startTime={routieStartTime}
               endTime={routieEndTime}
             />
@@ -198,7 +209,7 @@ const Planner = () => {
       <div className="flex-1">
         <MapView
           addedPlaces={addedPlaces}
-          selectedPlaces={selectedPlaces}
+          selectedPlaces={orderedPlaces}
           purposes={purposes}
           activePurpose={activePurpose}
           onPlaceSelect={handleSelectPlace}

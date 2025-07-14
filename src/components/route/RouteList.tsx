@@ -81,17 +81,10 @@ export const RouteList = ({
         <div className="space-y-2">
           {places.map((place, index) => {
             const purposeInfo = getPurposeInfo(place.purposeId);
-            
             return (
               <div
                 key={place.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, index)}
-                className={`bg-white rounded-lg p-3 border-2 transition-all duration-200 cursor-move hover:shadow-md ${
-                  draggedIndex === index ? 'opacity-50 scale-95' : ''
-                }`}
+                className={`bg-white rounded-lg p-3 border-2 transition-all duration-200 hover:shadow-md`}
                 style={{ borderColor: purposeInfo.color }}
               >
                 <div className="flex items-center gap-3">
@@ -104,7 +97,6 @@ export const RouteList = ({
                       {index + 1}
                     </div>
                   </div>
-
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span>{purposeInfo.icon}</span>
@@ -115,7 +107,6 @@ export const RouteList = ({
                       {purposeInfo.name} 목적
                     </div>
                   </div>
-
                   <Button
                     variant="ghost"
                     size="sm"
