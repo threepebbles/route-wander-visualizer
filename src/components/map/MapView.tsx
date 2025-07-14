@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from 'react';
 import { Purpose, SelectedPlace, Place } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,24 @@ interface MapViewProps {
   isPlaceSelected: (placeId: string) => boolean;
   onEditPlaceDetails?: (place: Place) => void;
 }
+
+// 두 지점 간의 이동 시간을 계산하는 함수 (단순 거리 기반)
+const calculateTravelTime = (place1: Place, place2: Place): number => {
+  const distance = Math.sqrt(
+    Math.pow(place1.x - place2.x, 2) + Math.pow(place1.y - place2.y, 2)
+  );
+  // 거리에 따른 이동 시간 (분 단위)
+  // 실제로는 더 복잡한 계산이 필요하지만, 여기서는 단순 공식 사용
+  return Math.max(5, Math.round(distance * 0.8)); // 최소 5분, 거리에 비례
+};
+
+// 두 지점의 중점을 계산하는 함수
+const getMidpoint = (place1: Place, place2: Place) => {
+  return {
+    x: (place1.x + place2.x) / 2,
+    y: (place1.y + place2.y) / 2
+  };
+};
 
 export const MapView = ({ 
   addedPlaces, 
@@ -155,6 +174,36 @@ export const MapView = ({
         </svg>
       )}
 
+      {/* Travel Time Labels */}
+      {sortedPlaces.length > 1 && sortedPlaces.map((place, index) => {
+        if (index === sortedPlaces.length - 1) return null;
+        const nextPlace = sortedPlaces[index + 1];
+        const shouldShow = !activePurpose || 
+          (place.purposeId === activePurpose && nextPlace.purposeId === activePurpose);
+        
+        if (!shouldShow) return null;
+
+        const midpoint = getMidpoint(place, nextPlace);
+        const travelTime = calculateTravelTime(place, nextPlace);
+
+        return (
+          <div
+            key={`travel-time-${place.id}-${nextPlace.id}`}
+            className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            style={{
+              left: `${midpoint.x}%`,
+              top: `${midpoint.y}%`,
+            }}
+          >
+            <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm border border-gray-200">
+              <span className="text-xs font-medium text-gray-600">
+                {travelTime}분
+              </span>
+            </div>
+          </div>
+        );
+      })}
+
       {/* Added Place Markers (not selected) */}
       {addedPlaces.map((place) => {
         const isSelected = isPlaceSelected(place.id);
@@ -294,6 +343,10 @@ export const MapView = ({
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
             <span>추가된 장소</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-white border border-gray-300 rounded-full"></div>
+            <span>이동 시간 (분)</span>
           </div>
         </div>
       </div>

@@ -10,7 +10,9 @@ import { ScheduleValidator } from '@/components/schedule/ScheduleValidator';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus, ArrowLeft } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Plus, ArrowLeft, Clock } from 'lucide-react';
 import { Purpose, Place, SelectedPlace, PurposeSelection } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -128,12 +130,10 @@ const Planner = () => {
     navigate('/');
   };
 
-  // 목적 순서 변경 핸들러
   const handlePurposeReorder = (newPurposes: Purpose[]) => {
     setPurposes(newPurposes);
   };
 
-  // 방문 순서: 목적 순서대로, 각 목적별 selectedPlaces 순서대로 정렬
   const orderedPlaces = purposes.flatMap(purpose =>
     selectedPlaces.filter(place => place.purposeId === purpose.id)
   );
@@ -165,41 +165,57 @@ const Planner = () => {
             </Button>
           </div>
 
-          {/* Schedule Validation Toggle (위로 이동) */}
-          <div className="flex items-center space-x-2 mb-4">
-            <Switch
-              id="schedule-validation"
-              checked={scheduleValidationEnabled}
-              onCheckedChange={setScheduleValidationEnabled}
-            />
-            <Label htmlFor="schedule-validation" className="text-sm">
-              일정 검증 표시
-            </Label>
+          {/* Schedule Validation Toggle */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="schedule-validation"
+                checked={scheduleValidationEnabled}
+                onCheckedChange={setScheduleValidationEnabled}
+              />
+              <Label htmlFor="schedule-validation" className="text-sm font-medium">
+                일정 검증 표시
+              </Label>
+            </div>
           </div>
 
-          {/* 일정 시작/종료 시간 입력란 */}
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">일정 시작</label>
-              <input
-                type="time"
-                value={routieStartTime}
-                onChange={e => setRoutieStartTime(e.target.value)}
-                className="border rounded px-2 py-1"
-                disabled={!scheduleValidationEnabled}
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">일정 종료</label>
-              <input
-                type="time"
-                value={routieEndTime}
-                onChange={e => setRoutieEndTime(e.target.value)}
-                className="border rounded px-2 py-1"
-                disabled={!scheduleValidationEnabled}
-              />
-            </div>
-          </div>
+          {/* Time Input Card */}
+          {scheduleValidationEnabled && (
+            <Card className="mb-4">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <Label className="text-sm font-medium">일정 시간</Label>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="start-time" className="text-xs text-muted-foreground">
+                      시작 시간
+                    </Label>
+                    <Input
+                      id="start-time"
+                      type="time"
+                      value={routieStartTime}
+                      onChange={e => setRoutieStartTime(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end-time" className="text-xs text-muted-foreground">
+                      종료 시간
+                    </Label>
+                    <Input
+                      id="end-time"
+                      type="time"
+                      value={routieEndTime}
+                      onChange={e => setRoutieEndTime(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <PurposeSidebar
