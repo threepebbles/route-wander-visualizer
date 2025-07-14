@@ -30,7 +30,7 @@ const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetailsFormProps) => {
   const [stayDuration, setStayDuration] = useState<number | undefined>(initialValues?.stayDuration ?? 0);
   const [openTime, setOpenTime] = useState(initialValues?.openTime ?? '00:00');
-  const [closeTime, setCloseTime] = useState(initialValues?.closeTime ?? '12:59');
+  const [closeTime, setCloseTime] = useState(initialValues?.closeTime ?? '23:59');
   const [breakTimeStart, setBreakTimeStart] = useState(initialValues?.breakTimeStart ?? '');
   const [breakTimeEnd, setBreakTimeEnd] = useState(initialValues?.breakTimeEnd ?? '');
   const [closedDays, setClosedDays] = useState<string[]>(initialValues?.closedDays ?? []);
@@ -69,6 +69,11 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
     }
   };
 
+  useEffect(() => {
+    handleChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stayDuration, openTime, closeTime, breakTimeStart, breakTimeEnd, closedDays, breakTimeEnabled]);
+
   return (
     <Card className="mt-4">
       <CardHeader>
@@ -83,9 +88,8 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
             placeholder="예: 60"
             value={typeof stayDuration === 'number' ? stayDuration : ''}
             onChange={(e) => {
-              const value = e.target.value ? parseInt(e.target.value) : undefined;
-              setStayDuration(value);
-              setTimeout(handleChange, 0);
+              const value = e.target.value;
+              setStayDuration(value === '' ? undefined : Number(value));
             }}
           />
         </div>
@@ -99,7 +103,6 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
               value={openTime}
               onChange={(e) => {
                 setOpenTime(e.target.value);
-                setTimeout(handleChange, 0);
               }}
             />
           </div>
@@ -111,7 +114,6 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
               value={closeTime}
               onChange={(e) => {
                 setCloseTime(e.target.value);
-                setTimeout(handleChange, 0);
               }}
             />
           </div>
@@ -134,7 +136,6 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
               value={breakTimeStart}
               onChange={(e) => {
                 setBreakTimeStart(e.target.value);
-                setTimeout(handleChange, 0);
               }}
               disabled={!breakTimeEnabled}
             />
@@ -144,7 +145,6 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
               value={breakTimeEnd}
               onChange={(e) => {
                 setBreakTimeEnd(e.target.value);
-                setTimeout(handleChange, 0);
               }}
               disabled={!breakTimeEnabled}
             />

@@ -50,7 +50,7 @@ export const ScheduleValidator = ({ selectedPlaces, startTime, endTime }: Schedu
       }
 
       // 체류 시간 추가
-      if (place.stayDuration) {
+      if (place.stayDuration !== undefined) {
         currentTime += place.stayDuration;
       } else {
         currentTime += 60; // 기본 1시간
@@ -63,11 +63,12 @@ export const ScheduleValidator = ({ selectedPlaces, startTime, endTime }: Schedu
     });
 
     // 전체 시간 체크
-    if (currentTime > endTimeMinutes) {
+    const exceededMinutes = Math.round(currentTime) - Math.round(endTimeMinutes);
+    if (exceededMinutes > 0) {
       issues.push({
         type: 'insufficient_time',
         placeIndex: -1,
-        message: '전체 일정이 종료 시간을 초과합니다.'
+        message: `전체 일정이 종료 시간을 ${exceededMinutes}분 초과합니다.`
       });
     }
 

@@ -165,7 +165,7 @@ const Planner = () => {
             </Button>
           </div>
 
-          {/* Schedule Validation Toggle */}
+          {/* Schedule Validation Toggle (위로 이동) */}
           <div className="flex items-center space-x-2 mb-4">
             <Switch
               id="schedule-validation"
@@ -175,6 +175,30 @@ const Planner = () => {
             <Label htmlFor="schedule-validation" className="text-sm">
               일정 검증 표시
             </Label>
+          </div>
+
+          {/* 일정 시작/종료 시간 입력란 */}
+          <div className="flex items-center gap-4 mb-4">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">일정 시작</label>
+              <input
+                type="time"
+                value={routieStartTime}
+                onChange={e => setRoutieStartTime(e.target.value)}
+                className="border rounded px-2 py-1"
+                disabled={!scheduleValidationEnabled}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">일정 종료</label>
+              <input
+                type="time"
+                value={routieEndTime}
+                onChange={e => setRoutieEndTime(e.target.value)}
+                className="border rounded px-2 py-1"
+                disabled={!scheduleValidationEnabled}
+              />
+            </div>
           </div>
         </div>
 
