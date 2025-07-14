@@ -184,9 +184,9 @@ export const MapView = ({
       })}
 
       {/* Selected Place Markers */}
-      {filteredSelectedPlaces.map((place) => {
-        // 전체 방문 순서에서의 index를 찾음
-        const visitIndex = sortedPlaces.findIndex(p => p.id === place.id);
+      {selectedPlaces.map((place) => {
+        const isActive = !activePurpose || place.purposeId === activePurpose;
+        const visitIndex = selectedPlaces.findIndex(p => p.id === place.id);
         return (
           <div
             key={place.id}
@@ -194,6 +194,7 @@ export const MapView = ({
             style={{
               left: `${place.x}%`,
               top: `${place.y}%`,
+              opacity: isActive ? 1 : 0.3,
             }}
             onClick={() => handleMarkerClick(place)}
           >
