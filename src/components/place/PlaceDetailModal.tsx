@@ -22,12 +22,13 @@ export const PlaceDetailModal = ({
 
   const handleSave = () => {
     if (!place) return;
-    
+    const filteredDetails = Object.fromEntries(
+      Object.entries(placeDetails).filter(([_, v]) => v !== undefined)
+    );
     const updatedPlace: Place = {
       ...place,
-      ...placeDetails,
+      ...filteredDetails,
     };
-    
     onUpdatePlace(updatedPlace);
     setPlaceDetails({});
     onClose();
@@ -54,6 +55,7 @@ export const PlaceDetailModal = ({
           </div>
 
           <PlaceDetailsForm
+            key={place.id}
             onDetailsChange={setPlaceDetails}
             initialValues={{
               stayDuration: place.stayDuration,

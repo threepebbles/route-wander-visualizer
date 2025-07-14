@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -27,33 +28,25 @@ interface PlaceDetailsFormProps {
 const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
 export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetailsFormProps) => {
-  const [stayDuration, setStayDuration] = useState<number | undefined>(initialValues?.stayDuration);
-  const [openTime, setOpenTime] = useState(initialValues?.openTime || '');
-  const [closeTime, setCloseTime] = useState(initialValues?.closeTime || '');
-  const [breakTimeStart, setBreakTimeStart] = useState(initialValues?.breakTimeStart || '');
-  const [breakTimeEnd, setBreakTimeEnd] = useState(initialValues?.breakTimeEnd || '');
-  const [closedDays, setClosedDays] = useState<string[]>(initialValues?.closedDays || []);
-
-  useEffect(() => {
-    if (initialValues) {
-      setStayDuration(initialValues.stayDuration);
-      setOpenTime(initialValues.openTime || '');
-      setCloseTime(initialValues.closeTime || '');
-      setBreakTimeStart(initialValues.breakTimeStart || '');
-      setBreakTimeEnd(initialValues.breakTimeEnd || '');
-      setClosedDays(initialValues.closedDays || []);
-    }
-  }, [initialValues]);
+  const [stayDuration, setStayDuration] = useState<number | undefined>(initialValues?.stayDuration ?? 0);
+  const [openTime, setOpenTime] = useState(initialValues?.openTime ?? '00:00');
+  const [closeTime, setCloseTime] = useState(initialValues?.closeTime ?? '12:59');
+  const [breakTimeStart, setBreakTimeStart] = useState(initialValues?.breakTimeStart ?? '');
+  const [breakTimeEnd, setBreakTimeEnd] = useState(initialValues?.breakTimeEnd ?? '');
+  const [closedDays, setClosedDays] = useState<string[]>(initialValues?.closedDays ?? []);
+  const [breakTimeEnabled, setBreakTimeEnabled] = useState(false);
 
   const handleChange = () => {
-    onDetailsChange({
-      stayDuration,
-      openTime: openTime || undefined,
-      closeTime: closeTime || undefined,
-      breakTimeStart: breakTimeStart || undefined,
-      breakTimeEnd: breakTimeEnd || undefined,
-      closedDays: closedDays.length > 0 ? closedDays : undefined,
-    });
+    const details: any = {};
+    if (stayDuration !== undefined) details.stayDuration = stayDuration;
+    if (openTime) details.openTime = openTime;
+    if (closeTime) details.closeTime = closeTime;
+    if (breakTimeEnabled) {
+      if (breakTimeStart) details.breakTimeStart = breakTimeStart;
+      if (breakTimeEnd) details.breakTimeEnd = breakTimeEnd;
+    }
+    if (closedDays.length > 0) details.closedDays = closedDays;
+    onDetailsChange(details);
   };
 
   const handleClosedDayChange = (day: string, checked: boolean) => {
@@ -62,6 +55,18 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
       : closedDays.filter(d => d !== day);
     setClosedDays(newClosedDays);
     setTimeout(handleChange, 0);
+  };
+
+  // 브레이크 타임 토글이 off로 바뀌면 값 초기화
+  const handleBreakTimeToggle = (checked: boolean) => {
+    setBreakTimeEnabled(checked);
+    if (!checked) {
+      setBreakTimeStart('');
+      setBreakTimeEnd('');
+      setTimeout(handleChange, 0);
+    } else {
+      setTimeout(handleChange, 0);
+    }
   };
 
   return (
@@ -76,7 +81,7 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
             id="stayDuration"
             type="number"
             placeholder="예: 60"
-            value={stayDuration || ''}
+            value={typeof stayDuration === 'number' ? stayDuration : ''}
             onChange={(e) => {
               const value = e.target.value ? parseInt(e.target.value) : undefined;
               setStayDuration(value);
@@ -114,6 +119,14 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
 
         <div>
           <Label className="text-sm font-medium">브레이크 타임</Label>
+          <div className="flex items-center space-x-2 mb-2">
+            <Switch
+              id="break-time-switch"
+              checked={breakTimeEnabled}
+              onCheckedChange={handleBreakTimeToggle}
+            />
+            <Label htmlFor="break-time-switch" className="text-xs">브레이크 타임 입력</Label>
+          </div>
           <div className="grid grid-cols-2 gap-2 mt-2">
             <Input
               type="time"
@@ -123,6 +136,7 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
                 setBreakTimeStart(e.target.value);
                 setTimeout(handleChange, 0);
               }}
+              disabled={!breakTimeEnabled}
             />
             <Input
               type="time"
@@ -132,6 +146,7 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
                 setBreakTimeEnd(e.target.value);
                 setTimeout(handleChange, 0);
               }}
+              disabled={!breakTimeEnabled}
             />
           </div>
         </div>
