@@ -9,6 +9,7 @@ interface MapViewProps {
   activePurpose: string | null;
   onPlaceSelect: (place: Place, purposeId: string) => void;
   isPlaceSelected: (placeId: string) => boolean;
+  onEditPlaceDetails?: (place: Place) => void;
 }
 
 export const MapView = ({ 
@@ -17,7 +18,8 @@ export const MapView = ({
   purposes, 
   activePurpose, 
   onPlaceSelect, 
-  isPlaceSelected 
+  isPlaceSelected,
+  onEditPlaceDetails 
 }: MapViewProps) => {
   const [clickedPlace, setClickedPlace] = useState<Place | null>(null);
 
@@ -49,6 +51,13 @@ export const MapView = ({
     setClickedPlace(null);
   };
 
+  const handleEditDetails = (place: Place) => {
+    if (onEditPlaceDetails) {
+      onEditPlaceDetails(place);
+    }
+    setClickedPlace(null);
+  };
+
   const handleCloseInfo = () => {
     setClickedPlace(null);
   };
@@ -56,6 +65,10 @@ export const MapView = ({
   const getMarkerOpacity = (purposeId: string) => {
     if (!activePurpose) return 1;
     return activePurpose === purposeId ? 1 : 0.3;
+  };
+
+  const isSelectedPlace = (placeId: string) => {
+    return selectedPlaces.some(p => p.id === placeId);
   };
 
   return (
@@ -175,14 +188,15 @@ export const MapView = ({
       {filteredSelectedPlaces.map((place, index) => (
         <div
           key={place.id}
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110"
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 cursor-pointer"
           style={{
             left: `${place.x}%`,
             top: `${place.y}%`,
           }}
+          onClick={() => handleMarkerClick(place)}
         >
           <div
-            className="relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg cursor-pointer border-4 border-white ring-2 ring-yellow-400"
+            className="relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg border-4 border-white ring-2 ring-yellow-400"
             style={{ backgroundColor: getPurposeColor(place.purposeId) }}
           >
             <span className="text-white text-lg font-bold">
@@ -238,13 +252,27 @@ export const MapView = ({
               <div>휴무일: {clickedPlace.closedDays.join(', ')}</div>
             )}
           </div>
-          <Button
-            onClick={() => handleSelectPlace(clickedPlace)}
-            className="w-full"
-            size="sm"
-          >
-            이 장소 선택하기
-          </Button>
+          
+          <div className="space-y-2">
+            {!isSelectedPlace(clickedPlace.id) ? (
+              <Button
+                onClick={() => handleSelectPlace(clickedPlace)}
+                className="w-full"
+                size="sm"
+              >
+                이 장소 선택하기
+              </Button>
+            ) : (
+              <Button
+                onClick={() => handleEditDetails(clickedPlace)}
+                variant="outline"
+                className="w-full"
+                size="sm"
+              >
+                상세 정보 수정
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

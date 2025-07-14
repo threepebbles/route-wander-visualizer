@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,17 +14,36 @@ interface PlaceDetailsFormProps {
     breakTimeEnd?: string;
     closedDays?: string[];
   }) => void;
+  initialValues?: {
+    stayDuration?: number;
+    openTime?: string;
+    closeTime?: string;
+    breakTimeStart?: string;
+    breakTimeEnd?: string;
+    closedDays?: string[];
+  };
 }
 
 const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
-export const PlaceDetailsForm = ({ onDetailsChange }: PlaceDetailsFormProps) => {
-  const [stayDuration, setStayDuration] = useState<number | undefined>();
-  const [openTime, setOpenTime] = useState('');
-  const [closeTime, setCloseTime] = useState('');
-  const [breakTimeStart, setBreakTimeStart] = useState('');
-  const [breakTimeEnd, setBreakTimeEnd] = useState('');
-  const [closedDays, setClosedDays] = useState<string[]>([]);
+export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetailsFormProps) => {
+  const [stayDuration, setStayDuration] = useState<number | undefined>(initialValues?.stayDuration);
+  const [openTime, setOpenTime] = useState(initialValues?.openTime || '');
+  const [closeTime, setCloseTime] = useState(initialValues?.closeTime || '');
+  const [breakTimeStart, setBreakTimeStart] = useState(initialValues?.breakTimeStart || '');
+  const [breakTimeEnd, setBreakTimeEnd] = useState(initialValues?.breakTimeEnd || '');
+  const [closedDays, setClosedDays] = useState<string[]>(initialValues?.closedDays || []);
+
+  useEffect(() => {
+    if (initialValues) {
+      setStayDuration(initialValues.stayDuration);
+      setOpenTime(initialValues.openTime || '');
+      setCloseTime(initialValues.closeTime || '');
+      setBreakTimeStart(initialValues.breakTimeStart || '');
+      setBreakTimeEnd(initialValues.breakTimeEnd || '');
+      setClosedDays(initialValues.closedDays || []);
+    }
+  }, [initialValues]);
 
   const handleChange = () => {
     onDetailsChange({

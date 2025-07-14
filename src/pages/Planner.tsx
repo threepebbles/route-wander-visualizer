@@ -1,13 +1,15 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapView } from '@/components/map/MapView';
 import { PurposeSidebar } from '@/components/sidebar/PurposeSidebar';
 import { RouteList } from '@/components/route/RouteList';
 import { PlaceSelectionModal } from '@/components/place/PlaceSelectionModal';
+import { PlaceDetailModal } from '@/components/place/PlaceDetailModal';
 import { CategoryModal } from '@/components/category/CategoryModal';
 import { ScheduleValidator } from '@/components/schedule/ScheduleValidator';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Plus, ArrowLeft } from 'lucide-react';
 import { Purpose, Place, SelectedPlace, PurposeSelection } from '@/types';
 import { useToast } from '@/hooks/use-toast';
@@ -20,10 +22,13 @@ const Planner = () => {
   const [activePurpose, setActivePurpose] = useState<string | null>(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showPlaceModal, setShowPlaceModal] = useState(false);
+  const [showPlaceDetailModal, setShowPlaceDetailModal] = useState(false);
   const [selectedPurposeForPlaces, setSelectedPurposeForPlaces] = useState<string | null>(null);
   const [purposeSelections, setPurposeSelections] = useState<PurposeSelection[]>([]);
   const [routieStartTime, setRoutieStartTime] = useState('');
   const [routieEndTime, setRoutieEndTime] = useState('');
+  const [scheduleValidationEnabled, setScheduleValidationEnabled] = useState(false);
+  const [placeForDetailEdit, setPlaceForDetailEdit] = useState<Place | null>(null);
   const { toast } = useToast();
 
   const handleAddPurpose = (purpose: Omit<Purpose, 'id'>) => {
@@ -97,6 +102,28 @@ const Planner = () => {
     return purposeSelections.some(sel => sel.placeId === placeId);
   };
 
+  const handleEditPlaceDetails = (place: Place) => {
+    setPlaceForDetailEdit(place);
+    setShowPlaceDetailModal(true);
+  };
+
+  const handleUpdatePlace = (updatedPlace: Place) => {
+    // Update in addedPlaces
+    setAddedPlaces(prev => 
+      prev.map(place => place.id === updatedPlace.id ? updatedPlace : place)
+    );
+    
+    // Update in selectedPlaces
+    setSelectedPlaces(prev => 
+      prev.map(place => place.id === updatedPlace.id ? { ...place, ...updatedPlace } : place)
+    );
+
+    toast({
+      title: "장소 정보가 업데이트되었습니다!",
+      description: `"${updatedPlace.name}"의 상세 정보가 수정되었습니다.`,
+    });
+  };
+
   const handleGoHome = () => {
     navigate('/');
   };
@@ -127,6 +154,18 @@ const Planner = () => {
               목적 추가
             </Button>
           </div>
+
+          {/* Schedule Validation Toggle */}
+          <div className="flex items-center space-x-2 mb-4">
+            <Switch
+              id="schedule-validation"
+              checked={scheduleValidationEnabled}
+              onCheckedChange={setScheduleValidationEnabled}
+            />
+            <Label htmlFor="schedule-validation" className="text-sm">
+              일정 검증 표시
+            </Label>
+          </div>
         </div>
 
         <PurposeSidebar
@@ -145,18 +184,13 @@ const Planner = () => {
             onClearAll={handleClearAll}
           />
 
-          <ScheduleValidator
-            selectedPlaces={selectedPlaces}
-            startTime={routieStartTime}
-            endTime={routieEndTime}
-          />
-
-          {/* RoutieCreator 삭제됨 */}
-          {/* <RoutieCreator
-            selectedPlaces={selectedPlaces}
-            purposes={purposes}
-            onSaveRoutie={handleSaveRoutie}
-          /> */}
+          {scheduleValidationEnabled && (
+            <ScheduleValidator
+              selectedPlaces={selectedPlaces}
+              startTime={routieStartTime}
+              endTime={routieEndTime}
+            />
+          )}
         </div>
       </div>
 
@@ -169,6 +203,7 @@ const Planner = () => {
           activePurpose={activePurpose}
           onPlaceSelect={handleSelectPlace}
           isPlaceSelected={isPlaceSelected}
+          onEditPlaceDetails={handleEditPlaceDetails}
         />
       </div>
 
@@ -184,6 +219,13 @@ const Planner = () => {
         onClose={() => setShowPlaceModal(false)}
         purposeId={selectedPurposeForPlaces}
         onSelectPlace={handleAddPlace}
+      />
+
+      <PlaceDetailModal
+        isOpen={showPlaceDetailModal}
+        onClose={() => setShowPlaceDetailModal(false)}
+        place={placeForDetailEdit}
+        onUpdatePlace={handleUpdatePlace}
       />
     </div>
   );

@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlaceDetailsForm } from './PlaceDetailsForm';
 import { Place } from '@/types';
 import { Search } from 'lucide-react';
 
@@ -52,8 +51,6 @@ export const PlaceSelectionModal = ({
   onSelectPlace,
 }: PlaceSelectionModalProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPlace, setSelectedPlace] = useState<Omit<Place, 'purposeId'> | null>(null);
-  const [placeDetails, setPlaceDetails] = useState<Partial<Place>>({});
 
   const filteredPlaces = useMemo(() => {
     return PREDEFINED_PLACES.filter(place => {
@@ -64,27 +61,19 @@ export const PlaceSelectionModal = ({
   }, [searchTerm]);
 
   const handlePlaceClick = (place: Omit<Place, 'purposeId'>) => {
-    setSelectedPlace(place);
-    setPlaceDetails({});
-  };
-
-  const handleConfirmSelection = () => {
-    if (!selectedPlace || !purposeId) return;
+    if (!purposeId) return;
     
-    const placeWithDetails: Place = {
-      ...selectedPlace,
+    const placeWithPurpose: Place = {
+      ...place,
       purposeId,
-      ...placeDetails,
     };
     
-    onSelectPlace(placeWithDetails, purposeId);
+    onSelectPlace(placeWithPurpose, purposeId);
     handleClose();
   };
 
   const handleClose = () => {
     setSearchTerm('');
-    setSelectedPlace(null);
-    setPlaceDetails({});
     onClose();
   };
 
@@ -96,86 +85,53 @@ export const PlaceSelectionModal = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          {!selectedPlace ? (
-            <>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="장소명 또는 설명으로 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="장소명 또는 설명으로 검색..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
 
-              <div className="max-h-96 overflow-y-auto space-y-2">
-                {filteredPlaces.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">
-                    <p>검색 결과가 없습니다.</p>
-                    <p className="text-sm mt-1">다른 키워드로 검색해보세요.</p>
-                  </div>
-                ) : (
-                  filteredPlaces.map((place) => (
-                    <div
-                      key={place.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-800">{place.name}</h3>
-                        <p className="text-sm text-gray-600 mt-1">{place.description}</p>
-                        <div className="text-xs text-gray-500 mt-2">
-                          위치: {place.x}%, {place.y}%
-                        </div>
-                      </div>
-                      
-                      <Button
-                        onClick={() => handlePlaceClick(place)}
-                        size="sm"
-                        className="ml-4"
-                      >
-                        선택
-                      </Button>
+          <div className="max-h-96 overflow-y-auto space-y-2">
+            {filteredPlaces.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                <p>검색 결과가 없습니다.</p>
+                <p className="text-sm mt-1">다른 키워드로 검색해보세요.</p>
+              </div>
+            ) : (
+              filteredPlaces.map((place) => (
+                <div
+                  key={place.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-800">{place.name}</h3>
+                    <p className="text-sm text-gray-600 mt-1">{place.description}</p>
+                    <div className="text-xs text-gray-500 mt-2">
+                      위치: {place.x}%, {place.y}%
                     </div>
-                  ))
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="p-4 border rounded-lg bg-gray-50">
-                <h3 className="font-medium text-gray-800">{selectedPlace.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">{selectedPlace.description}</p>
-              </div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => handlePlaceClick(place)}
+                    size="sm"
+                    className="ml-4"
+                  >
+                    선택
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
 
-              <PlaceDetailsForm
-                onDetailsChange={setPlaceDetails}
-              />
-
-              <div className="flex gap-2 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedPlace(null)}
-                  className="flex-1"
-                >
-                  뒤로가기
-                </Button>
-                <Button
-                  onClick={handleConfirmSelection}
-                  className="flex-1"
-                >
-                  장소 추가하기
-                </Button>
-              </div>
-            </>
-          )}
-
-          {!selectedPlace && (
-            <div className="flex justify-end pt-4 border-t">
-              <Button variant="outline" onClick={handleClose}>
-                닫기
-              </Button>
-            </div>
-          )}
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="outline" onClick={handleClose}>
+              닫기
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
