@@ -1,65 +1,63 @@
 
 import { useState } from 'react';
 import { MapView } from '@/components/map/MapView';
-import { CategorySidebar } from '@/components/sidebar/CategorySidebar';
+import { PurposeSidebar } from '@/components/sidebar/PurposeSidebar';
 import { RouteList } from '@/components/route/RouteList';
 import { PlaceSelectionModal } from '@/components/place/PlaceSelectionModal';
 import { CategoryModal } from '@/components/category/CategoryModal';
+import { RoutieCreator } from '@/components/routie/RoutieCreator';
+import { ScheduleValidator } from '@/components/schedule/ScheduleValidator';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { Category, Place, SelectedPlace, CategorySelection } from '@/types';
+import { Purpose, Place, SelectedPlace, PurposeSelection, Routie } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [addedPlaces, setAddedPlaces] = useState<Place[]>([]); // 추가된 모든 장소들
+  const [purposes, setPurposes] = useState<Purpose[]>([]);
+  const [addedPlaces, setAddedPlaces] = useState<Place[]>([]);
   const [selectedPlaces, setSelectedPlaces] = useState<SelectedPlace[]>([]);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activePurpose, setActivePurpose] = useState<string | null>(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showPlaceModal, setShowPlaceModal] = useState(false);
-  const [selectedCategoryForPlaces, setSelectedCategoryForPlaces] = useState<string | null>(null);
-  const [categorySelections, setCategorySelections] = useState<CategorySelection[]>([]);
+  const [selectedPurposeForPlaces, setSelectedPurposeForPlaces] = useState<string | null>(null);
+  const [purposeSelections, setPurposeSelections] = useState<PurposeSelection[]>([]);
+  const [routieStartTime, setRoutieStartTime] = useState('');
+  const [routieEndTime, setRoutieEndTime] = useState('');
+  const { toast } = useToast();
 
-  const handleAddCategory = (category: Omit<Category, 'id'>) => {
-    const newCategory: Category = {
-      ...category,
+  const handleAddPurpose = (purpose: Omit<Purpose, 'id'>) => {
+    const newPurpose: Purpose = {
+      ...purpose,
       id: Date.now().toString(),
     };
-    setCategories([...categories, newCategory]);
+    setPurposes([...purposes, newPurpose]);
   };
 
-  // 카테고리에 장소 추가 (여러 개 가능)
-  const handleAddPlace = (place: Place, categoryId: string) => {
-    const placeWithCategory = { ...place, categoryId };
+  const handleAddPlace = (place: Place, purposeId: string) => {
+    const placeWithPurpose = { ...place, purposeId };
     
-    // 이미 추가된 장소인지 확인
-    const isAlreadyAdded = addedPlaces.some(p => p.id === place.id && p.categoryId === categoryId);
-    if (!isAlreadyAdded) {
-      setAddedPlaces(prev => [...prev, placeWithCategory]);
-    }
+    setAddedPlaces(prev => [...prev, placeWithPurpose]);
     setShowPlaceModal(false);
   };
 
-  // 카테고리에서 장소 선택 (하나만 가능)
-  const handleSelectPlace = (place: Place, categoryId: string) => {
-    // 기존 선택된 장소가 있으면 제거
-    const existingSelection = categorySelections.find(sel => sel.categoryId === categoryId);
-    let newSelections = categorySelections;
+  const handleSelectPlace = (place: Place, purposeId: string) => {
+    const existingSelection = purposeSelections.find(sel => sel.purposeId === purposeId);
+    let newSelections = purposeSelections;
     
     if (existingSelection) {
-      newSelections = categorySelections.filter(sel => sel.categoryId !== categoryId);
+      newSelections = purposeSelections.filter(sel => sel.purposeId !== purposeId);
       setSelectedPlaces(prev => prev.filter(p => p.id !== existingSelection.placeId));
     }
 
-    // 새로운 선택 추가
-    const newSelection: CategorySelection = {
-      categoryId,
+    const newSelection: PurposeSelection = {
+      purposeId,
       placeId: place.id
     };
-    setCategorySelections([...newSelections, newSelection]);
+    setPurposeSelections([...newSelections, newSelection]);
 
     const selectedPlace: SelectedPlace = {
       ...place,
-      categoryId,
+      purposeId,
       order: selectedPlaces.length,
     };
     setSelectedPlaces(prev => [...prev, selectedPlace]);
@@ -76,7 +74,7 @@ const Index = () => {
   const handleRemovePlace = (placeId: string) => {
     const placeToRemove = selectedPlaces.find(p => p.id === placeId);
     if (placeToRemove) {
-      setCategorySelections(prev => 
+      setPurposeSelections(prev => 
         prev.filter(sel => sel.placeId !== placeId)
       );
     }
@@ -85,22 +83,38 @@ const Index = () => {
 
   const handleClearAll = () => {
     setSelectedPlaces([]);
-    setCategorySelections([]);
+    setPurposeSelections([]);
   };
 
-  const openPlaceSelection = (categoryId: string) => {
-    setSelectedCategoryForPlaces(categoryId);
+  const openPlaceSelection = (purposeId: string) => {
+    setSelectedPurposeForPlaces(purposeId);
     setShowPlaceModal(true);
   };
 
   const isPlaceSelected = (placeId: string) => {
-    return categorySelections.some(sel => sel.placeId === placeId);
+    return purposeSelections.some(sel => sel.placeId === placeId);
+  };
+
+  const handleSaveRoutie = (routieData: Omit<Routie, 'id' | 'createdAt'>) => {
+    const newRoutie: Routie = {
+      ...routieData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+    };
+    
+    // 실제로는 서버에 저장하거나 로컬 스토리지에 저장
+    console.log('루티 저장됨:', newRoutie);
+    
+    toast({
+      title: "루티가 저장되었습니다!",
+      description: `"${newRoutie.name}" 루티가 성공적으로 생성되었습니다.`,
+    });
   };
 
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-80 bg-white shadow-lg flex flex-col">
+      <div className="w-80 bg-white shadow-lg flex flex-col overflow-hidden">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-gray-800">동선 플래너</h1>
@@ -110,25 +124,37 @@ const Index = () => {
               className="flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              카테고리
+              목적 추가
             </Button>
           </div>
         </div>
 
-        <CategorySidebar
-          categories={categories}
-          activeCategory={activeCategory}
-          onCategorySelect={setActiveCategory}
+        <PurposeSidebar
+          purposes={purposes}
+          activePurpose={activePurpose}
+          onPurposeSelect={setActivePurpose}
           onPlaceSelect={openPlaceSelection}
         />
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <RouteList
             places={selectedPlaces}
-            categories={categories}
+            purposes={purposes}
             onReorder={handleReorderPlaces}
             onRemove={handleRemovePlace}
             onClearAll={handleClearAll}
+          />
+
+          <ScheduleValidator
+            selectedPlaces={selectedPlaces}
+            startTime={routieStartTime}
+            endTime={routieEndTime}
+          />
+
+          <RoutieCreator
+            selectedPlaces={selectedPlaces}
+            purposes={purposes}
+            onSaveRoutie={handleSaveRoutie}
           />
         </div>
       </div>
@@ -138,8 +164,8 @@ const Index = () => {
         <MapView
           addedPlaces={addedPlaces}
           selectedPlaces={selectedPlaces}
-          categories={categories}
-          activeCategory={activeCategory}
+          purposes={purposes}
+          activePurpose={activePurpose}
           onPlaceSelect={handleSelectPlace}
           isPlaceSelected={isPlaceSelected}
         />
@@ -149,13 +175,13 @@ const Index = () => {
       <CategoryModal
         isOpen={showCategoryModal}
         onClose={() => setShowCategoryModal(false)}
-        onAdd={handleAddCategory}
+        onAdd={handleAddPurpose}
       />
 
       <PlaceSelectionModal
         isOpen={showPlaceModal}
         onClose={() => setShowPlaceModal(false)}
-        categoryId={selectedCategoryForPlaces}
+        purposeId={selectedPurposeForPlaces}
         onSelectPlace={handleAddPlace}
       />
     </div>

@@ -1,0 +1,145 @@
+
+import { useState } from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface PlaceDetailsFormProps {
+  onDetailsChange: (details: {
+    stayDuration?: number;
+    openTime?: string;
+    closeTime?: string;
+    breakTimeStart?: string;
+    breakTimeEnd?: string;
+    closedDays?: string[];
+  }) => void;
+}
+
+const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+
+export const PlaceDetailsForm = ({ onDetailsChange }: PlaceDetailsFormProps) => {
+  const [stayDuration, setStayDuration] = useState<number | undefined>();
+  const [openTime, setOpenTime] = useState('');
+  const [closeTime, setCloseTime] = useState('');
+  const [breakTimeStart, setBreakTimeStart] = useState('');
+  const [breakTimeEnd, setBreakTimeEnd] = useState('');
+  const [closedDays, setClosedDays] = useState<string[]>([]);
+
+  const handleChange = () => {
+    onDetailsChange({
+      stayDuration,
+      openTime: openTime || undefined,
+      closeTime: closeTime || undefined,
+      breakTimeStart: breakTimeStart || undefined,
+      breakTimeEnd: breakTimeEnd || undefined,
+      closedDays: closedDays.length > 0 ? closedDays : undefined,
+    });
+  };
+
+  const handleClosedDayChange = (day: string, checked: boolean) => {
+    const newClosedDays = checked
+      ? [...closedDays, day]
+      : closedDays.filter(d => d !== day);
+    setClosedDays(newClosedDays);
+    setTimeout(handleChange, 0);
+  };
+
+  return (
+    <Card className="mt-4">
+      <CardHeader>
+        <CardTitle className="text-sm">장소 상세 정보 (선택사항)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <Label htmlFor="stayDuration">체류 시간 (분)</Label>
+          <Input
+            id="stayDuration"
+            type="number"
+            placeholder="예: 60"
+            value={stayDuration || ''}
+            onChange={(e) => {
+              const value = e.target.value ? parseInt(e.target.value) : undefined;
+              setStayDuration(value);
+              setTimeout(handleChange, 0);
+            }}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="openTime">영업 시작</Label>
+            <Input
+              id="openTime"
+              type="time"
+              value={openTime}
+              onChange={(e) => {
+                setOpenTime(e.target.value);
+                setTimeout(handleChange, 0);
+              }}
+            />
+          </div>
+          <div>
+            <Label htmlFor="closeTime">영업 종료</Label>
+            <Input
+              id="closeTime"
+              type="time"
+              value={closeTime}
+              onChange={(e) => {
+                setCloseTime(e.target.value);
+                setTimeout(handleChange, 0);
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium">브레이크 타임</Label>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <Input
+              type="time"
+              placeholder="시작"
+              value={breakTimeStart}
+              onChange={(e) => {
+                setBreakTimeStart(e.target.value);
+                setTimeout(handleChange, 0);
+              }}
+            />
+            <Input
+              type="time"
+              placeholder="종료"
+              value={breakTimeEnd}
+              onChange={(e) => {
+                setBreakTimeEnd(e.target.value);
+                setTimeout(handleChange, 0);
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium">휴무일</Label>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {weekdays.map((day) => (
+              <div key={day} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`day-${day}`}
+                  checked={closedDays.includes(day)}
+                  onCheckedChange={(checked) => 
+                    handleClosedDayChange(day, checked as boolean)
+                  }
+                />
+                <Label 
+                  htmlFor={`day-${day}`} 
+                  className="text-sm font-normal"
+                >
+                  {day}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
