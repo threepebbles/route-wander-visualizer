@@ -1,12 +1,11 @@
-
 import { useState } from 'react';
-import { Category, SelectedPlace } from '@/types';
+import { Purpose, SelectedPlace } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Trash2, GripVertical } from 'lucide-react';
 
 interface RouteListProps {
   places: SelectedPlace[];
-  categories: Category[];
+  purposes: Purpose[];
   onReorder: (places: SelectedPlace[]) => void;
   onRemove: (placeId: string) => void;
   onClearAll: () => void;
@@ -14,15 +13,15 @@ interface RouteListProps {
 
 export const RouteList = ({
   places,
-  categories,
+  purposes,
   onReorder,
   onRemove,
   onClearAll,
 }: RouteListProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
-  const getCategoryInfo = (categoryId: string) => {
-    return categories.find(cat => cat.id === categoryId) || { name: '알 수 없음', icon: '❓', color: '#gray' };
+  const getPurposeInfo = (purposeId: string) => {
+    return purposes.find(purpose => purpose.id === purposeId) || { name: '알 수 없음', icon: '❓', color: '#gray' };
   };
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -76,12 +75,12 @@ export const RouteList = ({
       {places.length === 0 ? (
         <div className="text-center text-gray-500 py-8">
           <p className="text-sm">아직 선택된 장소가 없습니다.</p>
-          <p className="text-sm mt-1">카테고리에서 장소를 추가해보세요!</p>
+          <p className="text-sm mt-1">목적에서 장소를 추가해보세요!</p>
         </div>
       ) : (
         <div className="space-y-2">
           {places.map((place, index) => {
-            const categoryInfo = getCategoryInfo(place.categoryId);
+            const purposeInfo = getPurposeInfo(place.purposeId);
             
             return (
               <div
@@ -93,14 +92,14 @@ export const RouteList = ({
                 className={`bg-white rounded-lg p-3 border-2 transition-all duration-200 cursor-move hover:shadow-md ${
                   draggedIndex === index ? 'opacity-50 scale-95' : ''
                 }`}
-                style={{ borderColor: categoryInfo.color }}
+                style={{ borderColor: purposeInfo.color }}
               >
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <GripVertical className="w-4 h-4 text-gray-400" />
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                      style={{ backgroundColor: categoryInfo.color }}
+                      style={{ backgroundColor: purposeInfo.color }}
                     >
                       {index + 1}
                     </div>
@@ -108,12 +107,12 @@ export const RouteList = ({
 
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span>{categoryInfo.icon}</span>
+                      <span>{purposeInfo.icon}</span>
                       <h3 className="font-medium text-gray-800">{place.name}</h3>
                     </div>
                     <p className="text-sm text-gray-600">{place.description}</p>
                     <div className="text-xs text-gray-500 mt-1">
-                      {categoryInfo.name} 카테고리
+                      {purposeInfo.name} 목적
                     </div>
                   </div>
 

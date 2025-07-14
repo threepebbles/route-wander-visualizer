@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { MapView } from '@/components/map/MapView';
 import { PurposeSidebar } from '@/components/sidebar/PurposeSidebar';
@@ -58,6 +57,7 @@ const Index = () => {
     const selectedPlace: SelectedPlace = {
       ...place,
       purposeId,
+      categoryId: purposeId, // For backward compatibility
       order: selectedPlaces.length,
     };
     setSelectedPlaces(prev => [...prev, selectedPlace]);

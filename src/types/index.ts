@@ -6,6 +6,9 @@ export interface Purpose {
   color: string;
 }
 
+// Backward compatibility alias
+export type Category = Purpose;
+
 export interface Place {
   id: string;
   name: string;
@@ -24,6 +27,8 @@ export interface Place {
 
 export interface SelectedPlace extends Place {
   order: number;
+  // Backward compatibility
+  categoryId: string;
 }
 
 export interface MapPosition {
