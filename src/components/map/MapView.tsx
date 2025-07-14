@@ -184,7 +184,8 @@ export const MapView = ({
         if (!shouldShow) return null;
 
         const midpoint = getMidpoint(place, nextPlace);
-        const travelTime = calculateTravelTime(place, nextPlace);
+        // 항상 30분으로 표시
+        const travelTime = 30;
 
         return (
           <div

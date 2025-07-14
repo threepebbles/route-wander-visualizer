@@ -53,13 +53,14 @@ export const ScheduleValidator = ({ selectedPlaces, startTime, endTime }: Schedu
       }
 
       // 체류 시간 추가 (현재 장소에서의 체류)
-      const stayDuration = place.stayDuration || 60; // 기본 1시간
+      const stayDuration = typeof place.stayDuration === 'number' ? place.stayDuration : 60; // 0도 정상 반영
       currentTime += stayDuration;
 
       // 다음 장소로의 이동 시간 추가 (마지막 장소가 아닌 경우)
       if (index < selectedPlaces.length - 1) {
-        const nextPlace = selectedPlaces[index + 1];
-        const travelTime = calculateTravelTime(place, nextPlace);
+        // const nextPlace = selectedPlaces[index + 1];
+        // const travelTime = calculateTravelTime(place, nextPlace);
+        const travelTime = 30; // 항상 30분으로 고정
         currentTime += travelTime;
       }
     });
