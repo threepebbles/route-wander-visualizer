@@ -59,6 +59,6 @@ export interface Purpose {
 
 export interface PurposeSelection {
   purposeId: string;
-  places: Place[];
+  places?: Place[]; // Made optional for backward compatibility
   placeId: string;
 }
