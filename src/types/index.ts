@@ -40,3 +40,21 @@ export interface ScheduleValidation {
     message: string;
   }>;
 }
+
+// Legacy types for compatibility (will be removed in future versions)
+export interface Category {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface Purpose {
+  id: string;
+  name: string;
+  categoryId: string;
+}
+
+export interface PurposeSelection {
+  purposeId: string;
+  places: Place[];
+}
