@@ -46,15 +46,19 @@ export interface Category {
   id: string;
   name: string;
   color: string;
+  icon: string;
 }
 
 export interface Purpose {
   id: string;
   name: string;
   categoryId: string;
+  color: string;
+  icon: string;
 }
 
 export interface PurposeSelection {
   purposeId: string;
   places: Place[];
+  placeId: string;
 }
