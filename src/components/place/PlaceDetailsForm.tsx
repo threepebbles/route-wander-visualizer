@@ -9,6 +9,8 @@ import { TimeInput } from '@/components/ui/time-input';
 
 interface PlaceDetailsFormProps {
   onDetailsChange: (details: {
+    name?: string;
+    address?: string;
     stayDuration?: number;
     openTime?: string;
     closeTime?: string;
@@ -17,6 +19,8 @@ interface PlaceDetailsFormProps {
     closedDays?: string[];
   }) => void;
   initialValues?: {
+    name?: string;
+    address?: string;
     stayDuration?: number;
     openTime?: string;
     closeTime?: string;
@@ -29,6 +33,8 @@ interface PlaceDetailsFormProps {
 const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
 export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetailsFormProps) => {
+  const [name, setName] = useState(initialValues?.name ?? '');
+  const [address, setAddress] = useState(initialValues?.address ?? '');
   const [stayDuration, setStayDuration] = useState<number | undefined>(initialValues?.stayDuration ?? 0);
   const [openTime, setOpenTime] = useState(initialValues?.openTime ?? '00:00');
   const [closeTime, setCloseTime] = useState(initialValues?.closeTime ?? '23:59');
@@ -39,6 +45,8 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
 
   const handleChange = () => {
     const details: any = {};
+    if (name.trim()) details.name = name.trim();
+    if (address.trim()) details.address = address.trim();
     if (stayDuration !== undefined) details.stayDuration = stayDuration;
     if (openTime) details.openTime = openTime;
     if (closeTime) details.closeTime = closeTime;
@@ -72,14 +80,35 @@ export const PlaceDetailsForm = ({ onDetailsChange, initialValues }: PlaceDetail
   useEffect(() => {
     handleChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stayDuration, openTime, closeTime, breakTimeStart, breakTimeEnd, closedDays, breakTimeEnabled]);
+  }, [name, address, stayDuration, openTime, closeTime, breakTimeStart, breakTimeEnd, closedDays, breakTimeEnabled]);
 
   return (
     <Card className="mt-4">
       <CardHeader>
-        <CardTitle className="text-sm">장소 상세 정보 (선택사항)</CardTitle>
+        <CardTitle className="text-sm">장소 상세 정보</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <Label htmlFor="place-name">장소명 *</Label>
+            <Input
+              id="place-name"
+              placeholder="장소 이름"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="place-address">주소 *</Label>
+            <Input
+              id="place-address"
+              placeholder="주소"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+        </div>
+
         <div>
           <Label htmlFor="stayDuration">체류 시간 (분)</Label>
           <Input

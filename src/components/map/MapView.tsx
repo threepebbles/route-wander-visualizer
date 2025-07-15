@@ -1,27 +1,14 @@
 
 import { useMemo, useState } from 'react';
-import { Purpose, SelectedPlace, Place } from '@/types';
+import { SelectedPlace, Place } from '@/types';
 import { Button } from '@/components/ui/button';
 
 interface MapViewProps {
-  addedPlaces: Place[];
+  places: Place[];
   selectedPlaces: SelectedPlace[];
-  purposes: Purpose[];
-  activePurpose: string | null;
-  onPlaceSelect: (place: Place, purposeId: string) => void;
-  isPlaceSelected: (placeId: string) => boolean;
+  onPlaceSelect: (place: Place) => void;
   onEditPlaceDetails?: (place: Place) => void;
 }
-
-// 두 지점 간의 이동 시간을 계산하는 함수 (단순 거리 기반)
-const calculateTravelTime = (place1: Place, place2: Place): number => {
-  const distance = Math.sqrt(
-    Math.pow(place1.x - place2.x, 2) + Math.pow(place1.y - place2.y, 2)
-  );
-  // 거리에 따른 이동 시간 (분 단위)
-  // 실제로는 더 복잡한 계산이 필요하지만, 여기서는 단순 공식 사용
-  return Math.max(5, Math.round(distance * 0.8)); // 최소 5분, 거리에 비례
-};
 
 // 두 지점의 중점을 계산하는 함수
 const getMidpoint = (place1: Place, place2: Place) => {
@@ -32,40 +19,21 @@ const getMidpoint = (place1: Place, place2: Place) => {
 };
 
 export const MapView = ({ 
-  addedPlaces, 
+  places, 
   selectedPlaces, 
-  purposes, 
-  activePurpose, 
   onPlaceSelect, 
-  isPlaceSelected,
   onEditPlaceDetails 
 }: MapViewProps) => {
   const [clickedPlace, setClickedPlace] = useState<Place | null>(null);
 
-  // 방문 순서(목적+장소 순서) 그대로 사용
-  const sortedPlaces = selectedPlaces;
-
-  const filteredSelectedPlaces = useMemo(() => {
-    if (!activePurpose) return selectedPlaces;
-    return selectedPlaces.filter(place => place.purposeId === activePurpose);
-  }, [selectedPlaces, activePurpose]);
-
-  const getPurposeColor = (purposeId: string) => {
-    const purpose = purposes.find(cat => cat.id === purposeId);
-    return purpose?.color || '#3b82f6';
-  };
-
-  const getPurposeIcon = (purposeId: string) => {
-    const purpose = purposes.find(cat => cat.id === purposeId);
-    return purpose?.icon || '📍';
-  };
+  const sortedPlaces = selectedPlaces.sort((a, b) => a.order - b.order);
 
   const handleMarkerClick = (place: Place) => {
     setClickedPlace(place);
   };
 
   const handleSelectPlace = (place: Place) => {
-    onPlaceSelect(place, place.purposeId);
+    onPlaceSelect(place);
     setClickedPlace(null);
   };
 
@@ -78,11 +46,6 @@ export const MapView = ({
 
   const handleCloseInfo = () => {
     setClickedPlace(null);
-  };
-
-  const getMarkerOpacity = (purposeId: string) => {
-    if (!activePurpose) return 1;
-    return activePurpose === purposeId ? 1 : 0.3;
   };
 
   const isSelectedPlace = (placeId: string) => {
@@ -151,10 +114,6 @@ export const MapView = ({
           {sortedPlaces.map((place, index) => {
             if (index === sortedPlaces.length - 1) return null;
             const nextPlace = sortedPlaces[index + 1];
-            const shouldShow = !activePurpose || 
-              (place.purposeId === activePurpose && nextPlace.purposeId === activePurpose);
-            
-            if (!shouldShow) return null;
 
             return (
               <line
@@ -174,108 +133,86 @@ export const MapView = ({
         </svg>
       )}
 
-      {/* Travel Time Labels */}
+      {/* Travel Time and Distance Labels */}
       {sortedPlaces.length > 1 && sortedPlaces.map((place, index) => {
         if (index === sortedPlaces.length - 1) return null;
         const nextPlace = sortedPlaces[index + 1];
-        const shouldShow = !activePurpose || 
-          (place.purposeId === activePurpose && nextPlace.purposeId === activePurpose);
-        
-        if (!shouldShow) return null;
-
         const midpoint = getMidpoint(place, nextPlace);
-        // 항상 30분으로 표시
-        const travelTime = 30;
 
         return (
           <div
-            key={`travel-time-${place.id}-${nextPlace.id}`}
+            key={`travel-info-${place.id}-${nextPlace.id}`}
             className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{
               left: `${midpoint.x}%`,
               top: `${midpoint.y}%`,
             }}
           >
-            <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm border border-gray-200">
-              <span className="text-xs font-medium text-gray-600">
-                {travelTime}분
-              </span>
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm border border-gray-200">
+              <div className="text-xs font-medium text-gray-600 text-center">
+                <div>30분</div>
+                <div className="text-gray-500">100m</div>
+              </div>
             </div>
           </div>
         );
       })}
 
-      {/* Added Place Markers (not selected) */}
-      {addedPlaces.map((place) => {
-        const isSelected = isPlaceSelected(place.id);
+      {/* Unselected Place Markers */}
+      {places.map((place) => {
+        const isSelected = isSelectedPlace(place.id);
         if (isSelected) return null;
 
         return (
           <div
-            key={`added-${place.id}`}
+            key={`unselected-${place.id}`}
             className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 cursor-pointer"
             style={{
               left: `${place.x}%`,
               top: `${place.y}%`,
-              opacity: getMarkerOpacity(place.purposeId),
             }}
             onClick={() => handleMarkerClick(place)}
           >
-            <div
-              className="relative flex items-center justify-center w-10 h-10 rounded-full shadow-lg border-2 border-white"
-              style={{ backgroundColor: getPurposeColor(place.purposeId) }}
-            >
-              <span className="text-white text-sm">
-                {getPurposeIcon(place.purposeId)}
-              </span>
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-full shadow-lg border-2 border-white bg-gray-500">
+              <span className="text-white text-sm">📍</span>
             </div>
           </div>
         );
       })}
 
       {/* Selected Place Markers */}
-      {selectedPlaces.map((place) => {
-        const isActive = !activePurpose || place.purposeId === activePurpose;
-        const visitIndex = selectedPlaces.findIndex(p => p.id === place.id);
-        return (
-          <div
-            key={place.id}
-            className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 cursor-pointer"
-            style={{
-              left: `${place.x}%`,
-              top: `${place.y}%`,
-              opacity: isActive ? 1 : 0.3,
-            }}
-            onClick={() => handleMarkerClick(place)}
-          >
-            <div
-              className="relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg border-4 border-white ring-2 ring-yellow-400"
-              style={{ backgroundColor: getPurposeColor(place.purposeId) }}
-            >
-              <span className="text-white text-lg font-bold">
-                {getPurposeIcon(place.purposeId)}
-              </span>
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                {visitIndex + 1}
-              </div>
-            </div>
-
-            <div className="absolute top-14 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-3 min-w-48 opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-              <h3 className="font-semibold text-gray-800">{place.name}</h3>
-              <p className="text-sm text-gray-600 mt-1">{place.description}</p>
-              <div className="text-xs text-gray-500 mt-2">
-                순서: {place.order + 1}번째 방문
-                {place.stayDuration && (
-                  <div>체류시간: {place.stayDuration}분</div>
-                )}
-                {place.openTime && place.closeTime && (
-                  <div>영업시간: {place.openTime}-{place.closeTime}</div>
-                )}
-              </div>
+      {sortedPlaces.map((place, index) => (
+        <div
+          key={place.id}
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 cursor-pointer"
+          style={{
+            left: `${place.x}%`,
+            top: `${place.y}%`,
+          }}
+          onClick={() => handleMarkerClick(place)}
+        >
+          <div className="relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg border-4 border-white ring-2 ring-yellow-400 bg-blue-500">
+            <span className="text-white text-lg font-bold">📍</span>
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+              {index + 1}
             </div>
           </div>
-        );
-      })}
+
+          <div className="absolute top-14 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-3 min-w-48 opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+            <h3 className="font-semibold text-gray-800">{place.name}</h3>
+            <p className="text-sm text-gray-600 mt-1">{place.address}</p>
+            <div className="text-xs text-gray-500 mt-2">
+              순서: {place.order + 1}번째 방문
+              {place.stayDuration && (
+                <div>체류시간: {place.stayDuration}분</div>
+              )}
+              {place.openTime && place.closeTime && (
+                <div>영업시간: {place.openTime}-{place.closeTime}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
 
       {/* Place Info Card */}
       {clickedPlace && (
@@ -289,7 +226,7 @@ export const MapView = ({
               ✕
             </button>
           </div>
-          <p className="text-sm text-gray-600 mb-3">{clickedPlace.description}</p>
+          <p className="text-sm text-gray-600 mb-3">{clickedPlace.address}</p>
           <div className="text-xs text-gray-500 mb-4 space-y-1">
             <div>위치: {clickedPlace.x}%, {clickedPlace.y}%</div>
             {clickedPlace.stayDuration && (
@@ -338,16 +275,16 @@ export const MapView = ({
             <span>동선 (방문 순서)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-yellow-400 rounded-full ring-1 ring-yellow-400"></div>
+            <div className="w-3 h-3 bg-blue-500 rounded-full ring-1 ring-yellow-400"></div>
             <span>선택된 장소</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-            <span>추가된 장소</span>
+            <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+            <span>등록된 장소</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-white border border-gray-300 rounded-full"></div>
-            <span>이동 시간 (분)</span>
+            <span>이동정보 (시간/거리)</span>
           </div>
         </div>
       </div>

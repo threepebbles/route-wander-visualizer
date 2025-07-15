@@ -1,11 +1,11 @@
+
 import { useState } from 'react';
-import { Purpose, SelectedPlace } from '@/types';
+import { SelectedPlace } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Trash2, GripVertical } from 'lucide-react';
+import { Trash2, GripVertical, Clock, Navigation } from 'lucide-react';
 
 interface RouteListProps {
   places: SelectedPlace[];
-  purposes: Purpose[];
   onReorder: (places: SelectedPlace[]) => void;
   onRemove: (placeId: string) => void;
   onClearAll: () => void;
@@ -13,16 +13,11 @@ interface RouteListProps {
 
 export const RouteList = ({
   places,
-  purposes,
   onReorder,
   onRemove,
   onClearAll,
 }: RouteListProps) => {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-
-  const getPurposeInfo = (purposeId: string) => {
-    return purposes.find(purpose => purpose.id === purposeId) || { name: '알 수 없음', icon: '❓', color: '#gray' };
-  };
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
@@ -51,13 +46,19 @@ export const RouteList = ({
     // Insert at new position
     newPlaces.splice(dropIndex, 0, draggedPlace);
     
-    onReorder(newPlaces);
+    // Update order
+    const reorderedPlaces = newPlaces.map((place, index) => ({
+      ...place,
+      order: index,
+    }));
+    
+    onReorder(reorderedPlaces);
     setDraggedIndex(null);
   };
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">방문 순서</h2>
         {places.length > 0 && (
           <Button
@@ -75,37 +76,35 @@ export const RouteList = ({
       {places.length === 0 ? (
         <div className="text-center text-gray-500 py-8">
           <p className="text-sm">아직 선택된 장소가 없습니다.</p>
-          <p className="text-sm mt-1">목적에서 장소를 추가해보세요!</p>
+          <p className="text-sm mt-1">장소를 선택해서 동선을 만들어보세요!</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {places.map((place, index) => {
-            const purposeInfo = getPurposeInfo(place.purposeId);
-            return (
+        <div className="space-y-3">
+          {places.map((place, index) => (
+            <div key={place.id}>
               <div
-                key={place.id}
-                className={`bg-white rounded-lg p-3 border-2 transition-all duration-200 hover:shadow-md`}
-                style={{ borderColor: purposeInfo.color }}
+                className="bg-white rounded-lg p-4 border-2 border-blue-200 transition-all duration-200 hover:shadow-md cursor-move"
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, index)}
               >
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <GripVertical className="w-4 h-4 text-gray-400" />
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                      style={{ backgroundColor: purposeInfo.color }}
-                    >
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold bg-blue-500">
                       {index + 1}
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span>{purposeInfo.icon}</span>
-                      <h3 className="font-medium text-gray-800">{place.name}</h3>
-                    </div>
-                    <p className="text-sm text-gray-600">{place.description}</p>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {purposeInfo.name} 목적
-                    </div>
+                    <h3 className="font-medium text-gray-800">{place.name}</h3>
+                    <p className="text-sm text-gray-600">{place.address}</p>
+                    {place.stayDuration && (
+                      <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        체류시간: {place.stayDuration}분
+                      </div>
+                    )}
                   </div>
                   <Button
                     variant="ghost"
@@ -117,8 +116,20 @@ export const RouteList = ({
                   </Button>
                 </div>
               </div>
-            );
-          })}
+
+              {/* 이동 정보 표시 (마지막 장소가 아닌 경우) */}
+              {index < places.length - 1 && (
+                <div className="flex items-center justify-center py-2">
+                  <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+                    <Navigation className="w-3 h-3" />
+                    <span>이동시간: 30분</span>
+                    <span>•</span>
+                    <span>거리: 100m</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
 

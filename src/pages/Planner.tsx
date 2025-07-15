@@ -1,108 +1,111 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapView } from '@/components/map/MapView';
-import { PurposeSidebar } from '@/components/sidebar/PurposeSidebar';
+import { PlaceManager } from '@/components/place/PlaceManager';
 import { RouteList } from '@/components/route/RouteList';
-import { PlaceSelectionModal } from '@/components/place/PlaceSelectionModal';
 import { PlaceDetailModal } from '@/components/place/PlaceDetailModal';
-import { CategoryModal } from '@/components/category/CategoryModal';
 import { ScheduleValidator } from '@/components/schedule/ScheduleValidator';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, ArrowLeft, Clock } from 'lucide-react';
-import { Purpose, Place, SelectedPlace, PurposeSelection } from '@/types';
+import { ArrowLeft, Clock } from 'lucide-react';
+import { Place, SelectedPlace } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { TimeInput } from '@/components/ui/time-input';
 
 const Planner = () => {
   const navigate = useNavigate();
-  const [purposes, setPurposes] = useState<Purpose[]>([]);
-  const [addedPlaces, setAddedPlaces] = useState<Place[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]);
   const [selectedPlaces, setSelectedPlaces] = useState<SelectedPlace[]>([]);
-  const [activePurpose, setActivePurpose] = useState<string | null>(null);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [showPlaceModal, setShowPlaceModal] = useState(false);
   const [showPlaceDetailModal, setShowPlaceDetailModal] = useState(false);
-  const [selectedPurposeForPlaces, setSelectedPurposeForPlaces] = useState<string | null>(null);
-  const [purposeSelections, setPurposeSelections] = useState<PurposeSelection[]>([]);
   const [routieStartTime, setRoutieStartTime] = useState('');
   const [routieEndTime, setRoutieEndTime] = useState('');
   const [scheduleValidationEnabled, setScheduleValidationEnabled] = useState(false);
   const [placeForDetailEdit, setPlaceForDetailEdit] = useState<Place | null>(null);
   const { toast } = useToast();
 
-  const handleAddPurpose = (purpose: Omit<Purpose, 'id'>) => {
-    const newPurpose: Purpose = {
-      ...purpose,
+  const handleAddPlace = (place: Omit<Place, 'id'>) => {
+    const newPlace: Place = {
+      ...place,
       id: Date.now().toString(),
     };
-    setPurposes([...purposes, newPurpose]);
+    setPlaces([...places, newPlace]);
+    toast({
+      title: "장소가 추가되었습니다!",
+      description: `"${newPlace.name}"이 등록되었습니다.`,
+    });
   };
 
-  const handleAddPlace = (place: Place, purposeId: string) => {
-    const placeWithPurpose = { ...place, purposeId };
-    
-    setAddedPlaces(prev => [...prev, placeWithPurpose]);
-    setShowPlaceModal(false);
-  };
-
-  const handleSelectPlace = (place: Place, purposeId: string) => {
-    const existingSelection = purposeSelections.find(sel => sel.purposeId === purposeId);
-    let newSelections = purposeSelections;
-    
-    if (existingSelection) {
-      newSelections = purposeSelections.filter(sel => sel.purposeId !== purposeId);
-      setSelectedPlaces(prev => prev.filter(p => p.id !== existingSelection.placeId));
+  const handleSelectPlace = (place: Place) => {
+    const isAlreadySelected = selectedPlaces.some(p => p.id === place.id);
+    if (isAlreadySelected) {
+      toast({
+        title: "이미 선택된 장소입니다",
+        description: `"${place.name}"은 이미 동선에 포함되어 있습니다.`,
+        variant: "destructive",
+      });
+      return;
     }
-
-    const newSelection: PurposeSelection = {
-      purposeId,
-      placeId: place.id
-    };
-    setPurposeSelections([...newSelections, newSelection]);
 
     const selectedPlace: SelectedPlace = {
       ...place,
-      purposeId,
-      categoryId: purposeId, // For backward compatibility
       order: selectedPlaces.length,
     };
     setSelectedPlaces(prev => [...prev, selectedPlace]);
+    
+    toast({
+      title: "장소가 선택되었습니다!",
+      description: `"${place.name}"이 동선에 추가되었습니다.`,
+    });
   };
 
   const handleReorderPlaces = (reorderedPlaces: SelectedPlace[]) => {
-    const updatedPlaces = reorderedPlaces.map((place, index) => ({
-      ...place,
-      order: index,
-    }));
-    setSelectedPlaces(updatedPlaces);
+    setSelectedPlaces(reorderedPlaces);
   };
 
   const handleRemovePlace = (placeId: string) => {
-    const placeToRemove = selectedPlaces.find(p => p.id === placeId);
-    if (placeToRemove) {
-      setPurposeSelections(prev => 
-        prev.filter(sel => sel.placeId !== placeId)
-      );
+    const place = selectedPlaces.find(p => p.id === placeId);
+    setSelectedPlaces(prev => 
+      prev.filter(p => p.id !== placeId)
+        .map((p, index) => ({ ...p, order: index }))
+    );
+    
+    if (place) {
+      toast({
+        title: "장소가 제거되었습니다",
+        description: `"${place.name}"이 동선에서 제거되었습니다.`,
+      });
     }
-    setSelectedPlaces(selectedPlaces.filter(place => place.id !== placeId));
   };
 
   const handleClearAll = () => {
     setSelectedPlaces([]);
-    setPurposeSelections([]);
+    toast({
+      title: "모든 장소가 제거되었습니다",
+      description: "동선이 초기화되었습니다.",
+    });
   };
 
-  const openPlaceSelection = (purposeId: string) => {
-    setSelectedPurposeForPlaces(purposeId);
-    setShowPlaceModal(true);
-  };
-
-  const isPlaceSelected = (placeId: string) => {
-    return purposeSelections.some(sel => sel.placeId === placeId);
+  const handleDeletePlace = (placeId: string) => {
+    const place = places.find(p => p.id === placeId);
+    
+    // 선택된 장소에서도 제거
+    setSelectedPlaces(prev => 
+      prev.filter(p => p.id !== placeId)
+        .map((p, index) => ({ ...p, order: index }))
+    );
+    
+    // 전체 장소 목록에서 제거
+    setPlaces(prev => prev.filter(p => p.id !== placeId));
+    
+    if (place) {
+      toast({
+        title: "장소가 삭제되었습니다",
+        description: `"${place.name}"이 완전히 삭제되었습니다.`,
+      });
+    }
   };
 
   const handleEditPlaceDetails = (place: Place) => {
@@ -111,8 +114,8 @@ const Planner = () => {
   };
 
   const handleUpdatePlace = (updatedPlace: Place) => {
-    // Update in addedPlaces
-    setAddedPlaces(prev => 
+    // Update in places
+    setPlaces(prev => 
       prev.map(place => place.id === updatedPlace.id ? updatedPlace : place)
     );
     
@@ -131,13 +134,7 @@ const Planner = () => {
     navigate('/');
   };
 
-  const handlePurposeReorder = (newPurposes: Purpose[]) => {
-    setPurposes(newPurposes);
-  };
-
-  const orderedPlaces = purposes.flatMap(purpose =>
-    selectedPlaces.filter(place => place.purposeId === purpose.id)
-  );
+  const orderedPlaces = selectedPlaces.sort((a, b) => a.order - b.order);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -156,14 +153,6 @@ const Planner = () => {
               </Button>
               <h1 className="text-2xl font-bold text-gray-800">루티 계획</h1>
             </div>
-            <Button
-              onClick={() => setShowCategoryModal(true)}
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              목적 추가
-            </Button>
           </div>
 
           {/* Schedule Validation Toggle */}
@@ -215,19 +204,23 @@ const Planner = () => {
           )}
         </div>
 
-        <PurposeSidebar
-          purposes={purposes}
-          activePurpose={activePurpose}
-          onPurposeSelect={setActivePurpose}
-          onPlaceSelect={openPlaceSelection}
-          onPurposeReorder={handlePurposeReorder}
-        />
+        {/* Place Manager */}
+        <div className="p-4 border-b">
+          <PlaceManager
+            places={places}
+            onAddPlace={handleAddPlace}
+            onUpdatePlace={handleUpdatePlace}
+            onDeletePlace={handleDeletePlace}
+            onSelectPlace={handleSelectPlace}
+            selectedPlaces={selectedPlaces}
+          />
+        </div>
 
+        {/* Route List and Schedule Validation */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <RouteList
             places={orderedPlaces}
-            purposes={purposes}
-            onReorder={() => {}} // 드래그 비활성화
+            onReorder={handleReorderPlaces}
             onRemove={handleRemovePlace}
             onClearAll={handleClearAll}
           />
@@ -245,30 +238,14 @@ const Planner = () => {
       {/* Main Map Area */}
       <div className="flex-1">
         <MapView
-          addedPlaces={addedPlaces}
+          places={places}
           selectedPlaces={orderedPlaces}
-          purposes={purposes}
-          activePurpose={activePurpose}
           onPlaceSelect={handleSelectPlace}
-          isPlaceSelected={isPlaceSelected}
           onEditPlaceDetails={handleEditPlaceDetails}
         />
       </div>
 
-      {/* Modals */}
-      <CategoryModal
-        isOpen={showCategoryModal}
-        onClose={() => setShowCategoryModal(false)}
-        onAdd={handleAddPurpose}
-      />
-
-      <PlaceSelectionModal
-        isOpen={showPlaceModal}
-        onClose={() => setShowPlaceModal(false)}
-        purposeId={selectedPurposeForPlaces}
-        onSelectPlace={handleAddPlace}
-      />
-
+      {/* Place Detail Modal */}
       <PlaceDetailModal
         isOpen={showPlaceDetailModal}
         onClose={() => setShowPlaceDetailModal(false)}
