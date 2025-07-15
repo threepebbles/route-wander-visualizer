@@ -8,7 +8,7 @@ import { ScheduleValidator } from '@/components/schedule/ScheduleValidator';
 import { PlaceDetailModal } from '@/components/place/PlaceDetailModal';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { Place, SelectedPlace } from '@/types';
+import { Place, SelectedPlace, Routie } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -129,7 +129,7 @@ const Index = () => {
   };
 
   const handleSaveRoutie = (routieData: Omit<Routie, 'id' | 'createdAt'>) => {
-    const newRoutie = {
+    const newRoutie: Routie = {
       ...routieData,
       id: Date.now().toString(),
       createdAt: new Date(),
