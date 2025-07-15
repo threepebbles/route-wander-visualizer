@@ -23,7 +23,7 @@ export const PlaceDetailModal = ({
   const handleSave = () => {
     if (!place) return;
     const filteredDetails = Object.fromEntries(
-      Object.entries(placeDetails).filter(([_, v]) => v !== undefined && v !== '')
+      Object.entries(placeDetails).filter(([_, v]) => v !== undefined)
     );
     const updatedPlace: Place = {
       ...place,
@@ -51,15 +51,13 @@ export const PlaceDetailModal = ({
         <div className="space-y-4">
           <div className="p-4 border rounded-lg bg-gray-50">
             <h3 className="font-medium text-gray-800">{place.name}</h3>
-            <p className="text-sm text-gray-600 mt-1">{place.address}</p>
+            <p className="text-sm text-gray-600 mt-1">{place.description}</p>
           </div>
 
           <PlaceDetailsForm
             key={place.id}
             onDetailsChange={setPlaceDetails}
             initialValues={{
-              name: place.name,
-              address: place.address,
               stayDuration: place.stayDuration,
               openTime: place.openTime,
               closeTime: place.closeTime,

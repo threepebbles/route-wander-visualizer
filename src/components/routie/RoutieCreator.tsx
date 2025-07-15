@@ -5,14 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
-import { Routie, SelectedPlace } from '@/types';
+import { Routie, SelectedPlace, Purpose } from '@/types';
 
 interface RoutieCreatorProps {
   selectedPlaces: SelectedPlace[];
+  purposes: Purpose[];
   onSaveRoutie: (routie: Omit<Routie, 'id' | 'createdAt'>) => void;
 }
 
-export const RoutieCreator = ({ selectedPlaces, onSaveRoutie }: RoutieCreatorProps) => {
+export const RoutieCreator = ({ selectedPlaces, purposes, onSaveRoutie }: RoutieCreatorProps) => {
   const [routieName, setRoutieName] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -33,6 +34,7 @@ export const RoutieCreator = ({ selectedPlaces, onSaveRoutie }: RoutieCreatorPro
       startTime,
       endTime,
       selectedPlaces: [...selectedPlaces],
+      purposes: [...purposes],
     });
 
     // 폼 초기화
