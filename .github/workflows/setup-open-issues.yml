@@ -80,7 +80,7 @@ jobs:
             const { issue } = context.payload;
             
             // GitHub Project v2의 고유 Node ID (GraphQL 전용)
-            const projectNodeId = 'PVT_kwDOA_44FM4A97bw';
+            const projectNodeId = 'PVT_kwDOA_44FM4A9rer';
             
             // Issue를 Project 아이템으로 추가
             const addItemResponse = await github.graphql(`
