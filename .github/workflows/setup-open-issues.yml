@@ -2,7 +2,7 @@ name: Setup Opened Issues
 
 on:
   issues:
-    types: [opened]
+    types: [opened, reopened]
 
 jobs:
   setup_issue:
@@ -69,3 +69,93 @@ jobs:
                 labels,
               });
             }
+            - name: Set Project v2
+                continue-on-error: true
+                uses: actions/github-script@v7
+                with:
+                  github-token: ${{ secrets.PROJECT_V2_TOKEN }}
+                  script: |
+                    const { issue } = context.payload;
+                    const projectNodeId = 'PVT_kwDOA_44FM4A9RQT';
+                    const addItemResponse = await github.graphql(`
+                      mutation($projectId: ID!, $contentId: ID!) {
+                        addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                          item { id }
+                        }
+                      }
+                    `, {
+                      projectId: projectNodeId,
+                      contentId: issue.node_id,
+                    });
+                    
+                    const itemId = addItemResponse.addProjectV2ItemById.item.id;
+                    
+                    const statusFieldId = 'PVTSSF_lADOA_44FM4A9RQTzgxBWgo';
+                    const todoOptionId = 'f75ad846';
+                    
+                    await github.graphql(`
+                      mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                        updateProjectV2ItemFieldValue(input: {
+                          projectId: $projectId,
+                          itemId: $itemId,
+                          fieldId: $fieldId,
+                          value: { singleSelectOptionId: $optionId }
+                        }) {
+                          projectV2Item { id }
+                        }
+                      }
+                    `, {
+                      projectId: projectNodeId,
+                      itemId,
+                      fieldId: statusFieldId,
+                      optionId: todoOptionId,
+                    });
+
+      - name: Set Project v2
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_V2_TOKEN }}
+          script: |
+            // GitHub Actions에서 전달 받은 Issue 정보
+            const { issue } = context.payload;
+            
+            // GitHub Project v2의 고유 Node ID (GraphQL 전용)
+            const projectNodeId = 'PVT_kwDOA_44FM4A97bw';
+            
+            // Issue를 Project 아이템으로 추가
+            const addItemResponse = await github.graphql(`
+              mutation($projectId: ID!, $contentId: ID!) {
+                addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                  item { id }
+                }
+              }
+            `, {
+              projectId: projectNodeId,
+              contentId: issue.node_id,
+            });
+            
+            // 생성된 Project 아이템의 id
+            const itemId = addItemResponse.addProjectV2ItemById.item.id;
+            
+            // Project의 "Status" 필드와 "TODO" 옵션의 고유 ID
+            const statusFieldId = 'PVTSSF_lADOA_44FM4A97bwzgxfBsA';
+            const todoOptionId = 'f75ad846';
+            
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { singleSelectOptionId: $optionId }
+                }) {
+                  projectV2Item { id }
+                }
+              }
+            `, {
+              projectId: projectNodeId,
+              itemId,
+              fieldId: statusFieldId,
+              optionId: todoOptionId,
+            });
