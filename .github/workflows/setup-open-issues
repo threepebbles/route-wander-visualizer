@@ -2,8 +2,7 @@ name: Setup Opened Issues
 
 on:
   issues:
-    types:
-      - opened
+    types: [opened]
 
 jobs:
   setup_issue:
