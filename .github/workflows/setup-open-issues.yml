@@ -126,19 +126,14 @@ jobs:
             // Start Date을 today로 설정
             const today = new Date().toISOString().split('T')[0];
             await github.graphql(`
-              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $date: String!) {
+              mutation {
                 updateProjectV2ItemFieldValue(input: {
-                  projectId: $projectId,
-                  itemId: $itemId,
-                  fieldId: $fieldId,
-                  value: { date: $date }
+                  projectId: "${projectNodeId}",
+                  itemId: "${itemId}",
+                  fieldId: "${startDateFieldId}",
+                  value: { date: "${today}" }
                 }) {
                   projectV2Item { id }
                 }
               }
-            `, {
-              projectId: projectNodeId,
-              itemId,
-              fieldId: startDateFieldId,
-              date: today,
-            });
+            `);
