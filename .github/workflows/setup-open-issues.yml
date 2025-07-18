@@ -98,7 +98,7 @@ jobs:
             const itemId = addItemResponse.addProjectV2ItemById.item.id;
             
             // Project의 "Status" 필드와 "TODO" 옵션의 고유 ID
-            const statusFieldId = 'PVTSSF_lADOA_44FM4A97bwzgxfBsA';
+            const statusFieldId = 'PVTSSF_lADOA_44FM4A9rerzgxT3kk';
             const todoOptionId = 'f75ad846';
             
             await github.graphql(`
