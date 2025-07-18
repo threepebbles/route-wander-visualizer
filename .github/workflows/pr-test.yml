@@ -2,7 +2,7 @@ name: PR Label-based Discord Notification
 
 on:
   pull_request:
-    types: [opened, labeled, synchronize]
+    types: [opened, reopened]
 
 jobs:
   notify-discord:
@@ -16,29 +16,25 @@ jobs:
     steps:
       - name: Print PR Labels JSON
         run: |
-          echo "=== Raw PR_LABELS_JSON ==="
-          
           LABELS=$(echo "$PR_LABELS_JSON" | jq -r '.[].name')
-          echo $LABELS
-    
+
       - name: Notify Discord based on PR label
         run: |
           LABELS=$(echo "$PR_LABELS_JSON" | jq -r '.[].name')
-
           for LABEL in $LABELS; do
             case "$LABEL" in
-              "BE")
+              "backend")
                 WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_BACKEND }}"
                 ;;
-              "FE")
+              "frontend")
                 WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_FRONTEND }}"
                 ;;
               *)
                 continue
                 ;;
             esac
+          
             MESSAGE="$PR_URL"
-
             if [ -z "$WEBHOOK_URL" ]; then
               echo "Webhook URL not set for label $LABEL. Skipping."
               continue
@@ -51,9 +47,6 @@ jobs:
           
             PAYLOAD=$(jq -n --arg content "$MESSAGE" '{content: $content}')
           
-            echo "Payload to send:"
-            echo "$PAYLOAD"
-            
             curl --fail -H "Content-Type: application/json" \
               -X POST \
               -d "$PAYLOAD" \
