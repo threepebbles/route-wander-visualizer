@@ -2,32 +2,50 @@ name: PR Label-based Discord Notification
 
 on:
   pull_request:
-    types:
-      - labeled
+    types: [opened, synchronized, reopened]
 
 jobs:
   notify-discord:
     runs-on: ubuntu-latest
+    env:
+      PR_TITLE: ${{ github.event.pull_request.title }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
+
     steps:
       - name: Notify Discord based on PR label
         run: |
-          LABEL_NAME="${{ github.event.label.name }}"
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_URL="${{ github.event.pull_request.html_url }}"
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-
-          if [ "$LABEL_NAME" = "BE" ]; then
-            WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_BACKEND }}"
-            MESSAGE="PR #$PR_NUMBER: $PR_TITLE\n$PR_URL"
-          elif [ "$LABEL_NAME" = "FE" ]; then
-            WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_FRONTEND }}"
-            MESSAGE="PR #$PR_NUMBER: $PR_TITLE\n$PR_URL"
-          else
-            echo "Label $LABEL_NAME not mapped to a Discord channel. Skipping."
-            exit 0
-          fi
-
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"$MESSAGE\"}" \
-               "$WEBHOOK_URL"
+          LABELS=$(echo "$PR_LABELS_JSON" | jq -r '.[].name')
+          
+          for LABEL in $LABELS; do
+            case "$LABEL" in
+              "backend")
+                WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_BACKEND }}"
+                ;;
+              "frontend")
+                WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_FRONTEND }}"
+                ;;
+              *)
+                continue
+                ;;
+            esac
+          
+            MESSAGE="$PR_URL"
+            if [ -z "$WEBHOOK_URL" ]; then
+              echo "Webhook URL not set for label $LABEL. Skipping."
+              continue
+            fi
+          
+            if [ -z "$MESSAGE" ]; then
+              echo "Message is empty. Skipping."
+              continue
+            fi
+          
+            PAYLOAD=$(jq -n --arg content "$MESSAGE" '{content: $content}')
+          
+            curl --fail -H "Content-Type: application/json" \
+              -X POST \
+              -d "$PAYLOAD" \
+              "$WEBHOOK_URL"
+          done
