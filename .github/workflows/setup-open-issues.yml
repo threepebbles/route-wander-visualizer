@@ -94,13 +94,17 @@ jobs:
               contentId: issue.node_id,
             });
             
-            // 생성된 Project 아이템의 id
+            // 생성된 Project 아이템의 ID
             const itemId = addItemResponse.addProjectV2ItemById.item.id;
             
-            // Project의 "Status" 필드와 "TODO" 옵션의 고유 ID
+            // Project의 Status 필드와 Todo 옵션의 고유 ID
             const statusFieldId = 'PVTSSF_lADOA_44FM4A9rerzgxT3kk';
             const todoOptionId = 'f75ad846';
             
+            // Start Date 필드의 고유 ID
+            const startDateFieldId = 'PVTF_lADOA_44FM4A9rerzgxT3mY'
+            
+            // Status 필드 Todo로 설정
             await github.graphql(`
               mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                 updateProjectV2ItemFieldValue(input: {
@@ -117,4 +121,24 @@ jobs:
               itemId,
               fieldId: statusFieldId,
               optionId: todoOptionId,
+            });
+            
+            // Start Date을 today로 설정
+            const today = new Date().toISOString().split('T')[0];
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $date: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { date: $date }
+                }) {
+                  projectV2Item { id }
+                }
+              }
+            `, {
+              projectId: projectNodeId,
+              itemId,
+              fieldId: startDateFieldId,
+              date: today,
             });
