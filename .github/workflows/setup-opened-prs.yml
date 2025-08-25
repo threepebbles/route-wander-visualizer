@@ -80,7 +80,7 @@ jobs:
             const feTeam = [];
             const beTeam = ['threepebbles', 'RaZel713'];
             
-            const author = issue.user.login;
+            const author = pr.user.login;
             const partLabel = feTeam.includes(author) ? '🖥️ Frontend' 
             : beTeam.includes(author) ? '⚙️ Backend' : null;
             if (partLabel) labels.push(partLabel);
@@ -100,7 +100,7 @@ jobs:
               await github.rest.issues.addLabels({
                 owner: repository.owner.login,
                 repo: repository.name,
-                issue_number: issue.number,
+                pull_number: pr.number,
                 labels: uniqueLabels,
               });
             }
@@ -199,8 +199,8 @@ jobs:
 
             // 3. Start Date을 today로 설정
             const openedAt = new Date(context.payload.action === 'reopened'
-              ? issue.updated_at 
-              : issue.created_at);
+              ? pr.updated_at 
+              : pr.created_at);
             const startDate = openedAt.toISOString().split('T')[0];
 
             const startDateField = fields.find(f =>
