@@ -36,7 +36,8 @@ jobs:
             const issueItemId = addResp.addProjectV2ItemById.item.id;
 
             // 2. End date 필드 id 조회
-            const fieldData = await github.graphql(`
+            const fieldData = await github.graphql(
+              `
               query($projectId: ID!) {
                 node(id: $projectId) {
                   ... on ProjectV2 {
@@ -49,7 +50,9 @@ jobs:
                   }
                 }
               }
-            `, { projectId });
+              `, 
+              { projectId }
+            );
 
             const fields = fieldData.node.fields.nodes;
             const endDateField = fields.find(f => f.name?.toLowerCase() === 'end date');
@@ -64,10 +67,10 @@ jobs:
               .toISOString().split('T')[0];
             await github.graphql(
               `
-              mutation($projectId: ID!, $issueItemId: ID!, $fieldId: ID!, $date: Date!) {
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $date: Date!) {
                 updateProjectV2ItemFieldValue(input: {
                   projectId: $projectId,
-                  itemId: $issueItemId,
+                  itemId: $itemId,
                   fieldId: $fieldId,
                   value: { date: $date }
                 }) {
