@@ -33,7 +33,7 @@ jobs:
               { projectId, contentId: issueId }
             );
             // Issue id
-            const issueItemId = addResp.addProjectV2ItemById.item.id;
+            const itemId = addResp.addProjectV2ItemById.item.id;
 
             // 2. End date 필드 id 조회
             const fieldData = await github.graphql(
@@ -78,5 +78,5 @@ jobs:
                 }
               }
               `,
-              { projectId, issueItemId, fieldId: endDateField.id, date: dateStr }
+              { projectId, itemId , fieldId: endDateField.id, date: dateStr }
             );
