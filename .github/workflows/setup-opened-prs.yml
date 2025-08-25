@@ -158,7 +158,7 @@ jobs:
             );
             const fields = fieldData.node.fields.nodes;
             
-            // 1. Issue를 Project에 추가 (이미 있으면 기존 item id를 반환)
+            // 1. PR을 Project에 추가 (이미 있으면 기존 item id를 반환)
             const addItemResponse = await github.graphql(
               `
               mutation($projectId: ID!, $contentId: ID!) {
