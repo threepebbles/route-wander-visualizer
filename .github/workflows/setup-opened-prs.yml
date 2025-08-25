@@ -171,15 +171,15 @@ jobs:
             );
             const prItemId = addItemResponse.addProjectV2ItemById.item.id;
 
-            // 2. Status 필드를 Todo로 설정
+            // 2. Status 필드를 In Progress로 설정
             const statusField = fields.find(f =>
               f.__typename === 'ProjectV2SingleSelectField' &&
               f.name?.toLowerCase() === 'status'
             );
             const statusFieldId = statusField?.id;
-            const todoOptionId = statusField?.options?.find(o => o.name.toLowerCase() === 'todo')?.id;
+            const inProgressOptionId = statusField?.options?.find(o => o.name.toLowerCase() === 'in progress')?.id;
             
-            if (statusFieldId && todoOptionId) {
+            if (statusFieldId && inProgressOptionId) {
               await github.graphql(
                 `
                 mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
@@ -193,7 +193,7 @@ jobs:
                   }
                 }
                 `, 
-                { projectId: projectId, itemId: prItemId, fieldId: statusFieldId, optionId: todoOptionId }
+                { projectId: projectId, itemId: prItemId, fieldId: statusFieldId, optionId: inProgressOptionId }
               );
             }
 
