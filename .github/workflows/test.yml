@@ -75,5 +75,5 @@ jobs:
                 }
               }
               `,
-              { projectId, itemId, fieldId: endDateField.id, date: dateStr }
+              { projectId, issueItemId, fieldId: endDateField.id, date: dateStr }
             );
