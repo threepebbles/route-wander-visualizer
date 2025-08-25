@@ -68,10 +68,10 @@ jobs:
             
             const fieldData = await github.graphql(
               `
-              query {
-                node(id: "${projectId}") {
+              query($projectId: ID!) {
+                node(id: $projectId) {
                   ... on ProjectV2 {
-                    fields(first: 50) {
+                    fields(first: 100) {
                       nodes {
                         __typename
             
@@ -104,7 +104,8 @@ jobs:
                   }
                 }
               }
-              `
+              `,
+              { projectId }
             );
 
             const fields = fieldData.node.fields.nodes;
@@ -120,9 +121,9 @@ jobs:
               `, 
               { projectId, contentId: issue.node_id }
             );
+            const itemId = addItemResponse.addProjectV2ItemById.item.id;
 
             // 2. Status 필드를 Todo로 설정
-            const itemId = addItemResponse.addProjectV2ItemById.item.id;
             const statusField = fields.find(f =>
               f.__typename === 'ProjectV2SingleSelectField' &&
               f.name?.toLowerCase() === 'status'
@@ -149,16 +150,18 @@ jobs:
             }
 
             // 3. Start Date을 today로 설정
+            const openedAt = new Date(context.payload.action === 'reopened'
+              ? issue.updated_at 
+              : issue.created_at);
+            const startDate = openedAt.toISOString().split('T')[0];
+            console.log('startDate:', startDate);
+
             const startDateField = fields.find(f =>
               f.__typename === 'ProjectV2Field' &&
               f.name?.toLowerCase() === 'start date'
             );
             const startDateFieldId = startDateField?.id;
-            
-            const createdAt = context.payload.issue.created_at;
-            const startDate = (createdAt ? new Date(createdAt) : new Date())
-              .toISOString().split('T')[0];
-            
+
             if (startDateFieldId) {
               await github.graphql(
                 `
@@ -184,29 +187,28 @@ jobs:
             const iterations = iterationField?.configuration?.iterations ?? [];
 
             // 오늘이 포함된 iteration 찾기
-            function isDateInRange(start, durationDays) {
-              const startDate = new Date(start);
-              const endDate = new Date(startDate);
-              endDate.setDate(endDate.getDate() + durationDays);
-              return createdAt >= startDate && createdAt < endDate;
+            function isDateInRange(startISOString, durationDays, today) {
+              const s = new Date(startISOString);
+              const e = new Date(s);
+              e.setDate(e.getDate() + durationDays);
+              return today >= s && today < e;
             }
 
-            const matchingIteration = iterations.find(i => isDateInRange(i.startDate, i.duration));
+            const matchingIteration = iterations.find(i => isDateInRange(i.startDate, i.duration, openedAt));
             console.log('matchingIteration:', matchingIteration);
 
-            if (iterationFieldId && matchingIteration) {
-              await github.graphql(`
-                mutation {
+            if (iterationFieldId && matchingIteration?.id) {
+              await github.graphql(
+                `
+                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $iterationId: String!) {
                   updateProjectV2ItemFieldValue(input: {
-                    projectId: "${projectId}",
-                    itemId: "${itemId}",
-                    fieldId: "${iterationFieldId}",
-                    value: {
-                      iterationId: "${matchingIteration.id}"
-                    }
-                  }) {
-                    projectV2Item { id }
-                  }
+                    projectId: $projectId,
+                    itemId: $itemId,
+                    fieldId: $fieldId,
+                    value: { iterationId: $iterationId }
+                  }) { projectV2Item { id } }
                 }
-              `);
+                `,
+                 { projectId, itemId, fieldId: iterationFieldId, iterationId: matchingIteration.id }
+                );
             }
