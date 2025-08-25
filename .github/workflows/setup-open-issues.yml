@@ -38,7 +38,7 @@ jobs:
             const { issue, repository } = context.payload;
             
             const labels = [];
-            // author 기반 라벨 추가
+            // author 기반 파트 라벨 추가
             const feTeam = [];
             const beTeam = ['threepebbles', 'RaZel713'];
             
@@ -46,7 +46,7 @@ jobs:
             const authorLabel = feTeam.includes(author) ? 'frontend' : beTeam.includes(author) ? 'backend' : null;
             if (authorLabel) labels.push(authorLabel);
             
-            // author별 닉네임 라벨 매핑
+            // auther에 따른 닉네임 라벨 매핑
             const personalLabelMap = {
               threepebbles: '🍍 헤일러',
               RaZel713: '🍋 라젤',
