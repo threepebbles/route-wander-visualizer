@@ -13,59 +13,67 @@ jobs:
 
     steps:
       - name: Set End date
-        continue-on-error: true
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.PROJECT_V2_TOKEN }}
           script: |
-            const { issue } = context.payload;
+            const projectId = 'PVT_kwHOAaxoFs4A9lXt';
+            const issueId = context.payload.issue.node_id;
 
-            const itemId = issue.node_id;
+            // 1) 이슈를 프로젝트에 추가 (이미 있으면 기존 item id를 반환)
+            const addResp = await github.graphql(
+              `
+              mutation($projectId: ID!, $contentId: ID!) {
+                addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                  item { id }
+                }
+              }
+              `,
+              { projectId, contentId: issueId }
+            );
+            const itemId = addResp.addProjectV2ItemById.item.id;
 
-            // Project v2 ID
-            const projectNodeId = 'PVT_kwHOAaxoFs4A9lXt';
-
-            // Project의 필드 목록 조회
+            // 2) End date 필드 id 조회
             const fieldData = await github.graphql(`
-              query {
-                node(id: "${projectNodeId}") {
+              query($projectId: ID!) {
+                node(id: $projectId) {
                   ... on ProjectV2 {
-                    fields(first: 50) {
+                    fields(first: 100) {
                       nodes {
                         __typename
-                        ... on ProjectV2FieldCommon {
-                            id
-                            name
-                        }
+                        ... on ProjectV2FieldCommon { id name }
                       }
                     }
                   }
                 }
               }
-            `);
+            `, { projectId });
+
             const fields = fieldData.node.fields.nodes;
-            
-            // End date 필드를 issue를 close한 날짜 설정
-            const endDateField = fields.find(f =>
-              f.__typename === 'ProjectV2Field' &&
-              f.name?.toLowerCase() === 'end date'
-            );
-            const endDateFieldId = endDateField?.id;
-            
-            const closedAt = issue.closed_at;
-            const closedAtISOString = closedAt.toISOString().split('T')[0];
-            
-            if (endDateFieldId) {
-              await github.graphql(`
-                mutation {
-                  updateProjectV2ItemFieldValue(input: {
-                    projectId: "${projectNodeId}",
-                    itemId: "${itemId}",
-                    fieldId: "${endDateFieldId}",
-                    value: { date: "${closedAtISOString}" }
-                  }) {
-                    projectV2Item { id }
-                  }
-                }
-              `);
+            const endDateField = fields.find(f => f.name?.toLowerCase() === 'end date');
+            if (!endDateField) {
+              console.log('End date 필드를 찾지 못했습니다.');
+              return;
             }
+
+            // 3) 종료일 = 이슈 closedAt(웹훅의 close 시각) 또는 오늘 날짜
+            const closedAt = context.payload.issue.closed_at; // ISO 8601
+            const dateStr = (closedAt ? new Date(closedAt) : new Date())
+              .toISOString().split('T')[0];
+
+            // 4) 필드값 업데이트
+            await github.graphql(
+              `
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $date: Date!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { date: $date }
+                }) {
+                  projectV2Item { id }
+                }
+              }
+              `,
+              { projectId, itemId, fieldId: endDateField.id, date: dateStr }
+            );
