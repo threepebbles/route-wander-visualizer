@@ -144,12 +144,7 @@ jobs:
                   }
                 }
                 `, 
-                {
-                  projectId: projectId,
-                  itemId,
-                  fieldId: statusFieldId,
-                  optionId: todoOptionId,
-                }
+                { projectId: projectId, itemId, fieldId: statusFieldId, optionId: todoOptionId }
               );
             }
 
@@ -193,7 +188,7 @@ jobs:
               const startDate = new Date(start);
               const endDate = new Date(startDate);
               endDate.setDate(endDate.getDate() + durationDays);
-              return today >= startDate && today < endDate;
+              return openedAt >= startDate && openedAt < endDate;
             }
 
             const matchingIteration = iterations.find(i => isDateInRange(i.startDate, i.duration));
