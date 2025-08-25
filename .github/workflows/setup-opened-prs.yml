@@ -5,7 +5,6 @@ on:
     types: [ opened, reopened ]
 
 jobs:
-
   setup_pr:
     runs-on: ubuntu-latest
     permissions:
@@ -168,9 +167,9 @@ jobs:
                 }
               }
               `, 
-              { projectId, contentId: issue.node_id }
+              { projectId, contentId: pr.node_id }
             );
-            const issueItemId = addItemResponse.addProjectV2ItemById.item.id;
+            const prItemId = addItemResponse.addProjectV2ItemById.item.id;
 
             // 2. Status 필드를 Todo로 설정
             const statusField = fields.find(f =>
@@ -194,7 +193,7 @@ jobs:
                   }
                 }
                 `, 
-                { projectId: projectId, itemId: issueItemId, fieldId: statusFieldId, optionId: todoOptionId }
+                { projectId: projectId, itemId: prItemId, fieldId: statusFieldId, optionId: todoOptionId }
               );
             }
 
@@ -222,7 +221,7 @@ jobs:
                   }) { projectV2Item { id } }
                 }
                 `,
-                { projectId, itemId: issueItemId, fieldId: startDateFieldId, date: startDate }
+                { projectId, itemId: prItemId, fieldId: startDateFieldId, date: startDate }
               );
             }
             
@@ -256,6 +255,6 @@ jobs:
                   }) { projectV2Item { id } }
                 }
                 `,
-                 { projectId, itemId: issueItemId, fieldId: iterationFieldId, iterationId: matchingIteration.id }
+                 { projectId, itemId: prItemId, fieldId: iterationFieldId, iterationId: matchingIteration.id }
                 );
             }
