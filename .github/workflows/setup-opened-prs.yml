@@ -39,8 +39,8 @@ jobs:
             const { pull_request: pr, repository } = context.payload;
             const author = pr.user.login;
 
-            const feTeam = ['ohgus', 'AHHYUNJU', 'aydenote', 'jeongyou'];
-            const beTeam = ['threepebbles', 'goohong', 'cookie-meringue', 'DongchannN'];
+            const feTeam = [];
+            const beTeam = ['threepebbles', 'RaZel713'];
 
             const isAuthorFE = feTeam.includes(author);
             const isAuthorBE = beTeam.includes(author);
@@ -113,7 +113,7 @@ jobs:
           github-token: ${{ secrets.PROJECT_V2_TOKEN }}
           script: |
             // Project v2 ID
-            const projectNodeId = 'PVT_kwDODYNUWs4BBQxw';
+            const projectNodeId = 'PVT_kwHOAaxoFs4A9lXt';
             const { pull_request: pr } = context.payload;
             
             const fieldData = await github.graphql(
