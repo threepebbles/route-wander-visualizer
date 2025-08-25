@@ -100,7 +100,7 @@ jobs:
               await github.rest.issues.addLabels({
                 owner: repository.owner.login,
                 repo: repository.name,
-                pull_number: pr.number,
+                issue_number: pr.number,
                 labels: uniqueLabels,
               });
             }
