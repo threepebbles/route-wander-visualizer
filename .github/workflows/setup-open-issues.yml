@@ -155,8 +155,8 @@ jobs:
             );
             const startDateFieldId = startDateField?.id;
             
-            const openedAt = context.payload.issue.opened_at;
-            const startDate = (openedAt ? new Date(openedAt) : new Date())
+            const createdAt = context.payload.issue.created_at;
+            const startDate = (createdAt ? new Date(createdAt) : new Date())
               .toISOString().split('T')[0];
             
             if (startDateFieldId) {
@@ -188,7 +188,7 @@ jobs:
               const startDate = new Date(start);
               const endDate = new Date(startDate);
               endDate.setDate(endDate.getDate() + durationDays);
-              return openedAt >= startDate && openedAt < endDate;
+              return createdAt >= startDate && createdAt < endDate;
             }
 
             const matchingIteration = iterations.find(i => isDateInRange(i.startDate, i.duration));
