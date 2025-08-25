@@ -1,0 +1,24 @@
+name: Test Project V2 API
+
+on:
+  issues:
+    types: [ closed ]
+
+jobs:
+  setup_issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Set End date
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_V2_TOKEN }}
+          script: |
+            const { issue } = context.payload;
+            console.log("issue.node_id:", issue.node_id);
+            console.log("issue.number:", issue.number);
+           
