@@ -192,6 +192,7 @@ jobs:
             }
 
             const matchingIteration = iterations.find(i => isDateInRange(i.startDate, i.duration));
+            console.log('matchingIteration:', matchingIteration);
 
             if (iterationFieldId && matchingIteration) {
               await github.graphql(`
