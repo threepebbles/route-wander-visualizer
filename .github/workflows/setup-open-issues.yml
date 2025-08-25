@@ -45,13 +45,24 @@ jobs:
             const author = issue.user.login;
             const authorLabel = feTeam.includes(author) ? 'frontend' : beTeam.includes(author) ? 'backend' : null;
             if (authorLabel) labels.push(authorLabel);
-
-            if (labels.length) {
+            
+            // author별 닉네임 라벨 매핑
+            const personalLabelMap = {
+              threepebbles: '🍍 헤일러',
+              RaZel713: '🍋 라젤',
+            };
+            const personalLabel = personalLabelMap[author];
+            if (personalLabel) labels.push(personalLabel);
+            
+            // 중복 제거
+            const uniqueLabels = [...new Set(labels)];
+            
+            if (uniqueLabels.length) {
               await github.rest.issues.addLabels({
                 owner: repository.owner.login,
                 repo: repository.name,
                 issue_number: issue.number,
-                labels,
+                labels: uniqueLabels,
               });
             }
 
@@ -152,7 +163,6 @@ jobs:
               ? issue.updated_at 
               : issue.created_at);
             const startDate = openedAt.toISOString().split('T')[0];
-            console.log('startDate:', startDate);
 
             const startDateField = fields.find(f =>
               f.__typename === 'ProjectV2Field' &&
@@ -193,7 +203,6 @@ jobs:
             }
 
             const matchingIteration = iterations.find(i => isDateInRange(i.startDate, i.duration, openedAt));
-            console.log('matchingIteration:', matchingIteration);
 
             if (iterationFieldId && matchingIteration?.id) {
               await github.graphql(
