@@ -41,7 +41,7 @@ export interface PurposeSelection {
   placeId: string;
 }
 
-export interface Routie {
+export interface Route {
   id: string;
   name: string;
   startTime: string; // HH:MM 형식

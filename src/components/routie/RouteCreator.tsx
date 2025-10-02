@@ -1,26 +1,25 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
-import { Routie, SelectedPlace, Purpose } from '@/types';
+import { Route, SelectedPlace, Purpose } from '@/types';
 
-interface RoutieCreatorProps {
+interface RouteCreatorProps {
   selectedPlaces: SelectedPlace[];
   purposes: Purpose[];
-  onSaveRoutie: (routie: Omit<Routie, 'id' | 'createdAt'>) => void;
+  onSaveRoute: (route: Omit<Route, 'id' | 'createdAt'>) => void;
 }
 
-export const RoutieCreator = ({ selectedPlaces, purposes, onSaveRoutie }: RoutieCreatorProps) => {
-  const [routieName, setRoutieName] = useState('');
+export const RouteCreator = ({ selectedPlaces, purposes, onSaveRoute }: RouteCreatorProps) => {
+  const [routeName, setRouteName] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
 
   const handleSave = () => {
-    if (!routieName.trim() || !startTime || !endTime) {
-      alert('루티 이름과 시작/종료 시간을 모두 입력해주세요.');
+    if (!routeName.trim() || !startTime || !endTime) {
+      alert('동선 이름과 시작/종료 시간을 모두 입력해주세요.');
       return;
     }
 
@@ -29,8 +28,8 @@ export const RoutieCreator = ({ selectedPlaces, purposes, onSaveRoutie }: Routie
       return;
     }
 
-    onSaveRoutie({
-      name: routieName.trim(),
+    onSaveRoute({
+      name: routeName.trim(),
       startTime,
       endTime,
       selectedPlaces: [...selectedPlaces],
@@ -38,7 +37,7 @@ export const RoutieCreator = ({ selectedPlaces, purposes, onSaveRoutie }: Routie
     });
 
     // 폼 초기화
-    setRoutieName('');
+    setRouteName('');
     setStartTime('');
     setEndTime('');
   };
@@ -46,16 +45,16 @@ export const RoutieCreator = ({ selectedPlaces, purposes, onSaveRoutie }: Routie
   return (
     <Card className="mt-4">
       <CardHeader>
-        <CardTitle className="text-lg">루티 생성</CardTitle>
+        <CardTitle className="text-lg">동선 생성</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="routieName">루티 이름</Label>
+          <Label htmlFor="routeName">동선 이름</Label>
           <Input
-            id="routieName"
+            id="routeName"
             placeholder="예: 강남 맛집 투어"
-            value={routieName}
-            onChange={(e) => setRoutieName(e.target.value)}
+            value={routeName}
+            onChange={(e) => setRouteName(e.target.value)}
           />
         </div>
 
@@ -87,10 +86,10 @@ export const RoutieCreator = ({ selectedPlaces, purposes, onSaveRoutie }: Routie
         <Button 
           onClick={handleSave} 
           className="w-full"
-          disabled={!routieName.trim() || !startTime || !endTime || selectedPlaces.length === 0}
+          disabled={!routeName.trim() || !startTime || !endTime || selectedPlaces.length === 0}
         >
           <Save className="w-4 h-4 mr-2" />
-          이 루티 저장하기
+          이 동선 저장하기
         </Button>
       </CardContent>
     </Card>

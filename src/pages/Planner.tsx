@@ -28,8 +28,8 @@ const Planner = () => {
   const [showPlaceDetailModal, setShowPlaceDetailModal] = useState(false);
   const [selectedPurposeForPlaces, setSelectedPurposeForPlaces] = useState<string | null>(null);
   const [purposeSelections, setPurposeSelections] = useState<PurposeSelection[]>([]);
-  const [routieStartTime, setRoutieStartTime] = useState('');
-  const [routieEndTime, setRoutieEndTime] = useState('');
+  const [routeStartTime, setRouteStartTime] = useState('');
+  const [routeEndTime, setRouteEndTime] = useState('');
   const [scheduleValidationEnabled, setScheduleValidationEnabled] = useState(false);
   const [placeForDetailEdit, setPlaceForDetailEdit] = useState<Place | null>(null);
   const { toast } = useToast();
@@ -154,7 +154,7 @@ const Planner = () => {
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
-              <h1 className="text-2xl font-bold text-gray-800">루티 계획</h1>
+              <h1 className="text-2xl font-bold text-gray-800">동선 계획</h1>
             </div>
             <Button
               onClick={() => setShowCategoryModal(true)}
@@ -194,8 +194,8 @@ const Planner = () => {
                       시작 시간
                     </Label>
                     <TimeInput
-                      value={routieStartTime}
-                      onChange={setRoutieStartTime}
+                      value={routeStartTime}
+                      onChange={setRouteStartTime}
                       placeholder="시작 시간"
                     />
                   </div>
@@ -204,8 +204,8 @@ const Planner = () => {
                       종료 시간
                     </Label>
                     <TimeInput
-                      value={routieEndTime}
-                      onChange={setRoutieEndTime}
+                      value={routeEndTime}
+                      onChange={setRouteEndTime}
                       placeholder="종료 시간"
                     />
                   </div>
@@ -235,8 +235,8 @@ const Planner = () => {
           {scheduleValidationEnabled && (
             <ScheduleValidator
               selectedPlaces={orderedPlaces}
-              startTime={routieStartTime}
-              endTime={routieEndTime}
+              startTime={routeStartTime}
+              endTime={routeEndTime}
             />
           )}
         </div>

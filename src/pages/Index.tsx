@@ -4,11 +4,11 @@ import { PurposeSidebar } from '@/components/sidebar/PurposeSidebar';
 import { RouteList } from '@/components/route/RouteList';
 import { PlaceSelectionModal } from '@/components/place/PlaceSelectionModal';
 import { CategoryModal } from '@/components/category/CategoryModal';
-import { RoutieCreator } from '@/components/routie/RoutieCreator';
+import { RouteCreator } from '@/components/routie/RouteCreator';
 import { ScheduleValidator } from '@/components/schedule/ScheduleValidator';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { Purpose, Place, SelectedPlace, PurposeSelection, Routie } from '@/types';
+import { Purpose, Place, SelectedPlace, PurposeSelection, Route } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -20,8 +20,8 @@ const Index = () => {
   const [showPlaceModal, setShowPlaceModal] = useState(false);
   const [selectedPurposeForPlaces, setSelectedPurposeForPlaces] = useState<string | null>(null);
   const [purposeSelections, setPurposeSelections] = useState<PurposeSelection[]>([]);
-  const [routieStartTime, setRoutieStartTime] = useState('');
-  const [routieEndTime, setRoutieEndTime] = useState('');
+  const [routeStartTime, setRouteStartTime] = useState('');
+  const [routeEndTime, setRouteEndTime] = useState('');
   const { toast } = useToast();
 
   const handleAddPurpose = (purpose: Omit<Purpose, 'id'>) => {
@@ -95,19 +95,19 @@ const Index = () => {
     return purposeSelections.some(sel => sel.placeId === placeId);
   };
 
-  const handleSaveRoutie = (routieData: Omit<Routie, 'id' | 'createdAt'>) => {
-    const newRoutie: Routie = {
-      ...routieData,
+  const handleSaveRoute = (routeData: Omit<Route, 'id' | 'createdAt'>) => {
+    const newRoute: Route = {
+      ...routeData,
       id: Date.now().toString(),
       createdAt: new Date(),
     };
     
     // 실제로는 서버에 저장하거나 로컬 스토리지에 저장
-    console.log('루티 저장됨:', newRoutie);
+    console.log('동선 저장됨:', newRoute);
     
     toast({
-      title: "루티가 저장되었습니다!",
-      description: `"${newRoutie.name}" 루티가 성공적으로 생성되었습니다.`,
+      title: "동선이 저장되었습니다!",
+      description: `"${newRoute.name}" 동선이 성공적으로 생성되었습니다.`,
     });
   };
 
@@ -147,14 +147,14 @@ const Index = () => {
 
           <ScheduleValidator
             selectedPlaces={selectedPlaces}
-            startTime={routieStartTime}
-            endTime={routieEndTime}
+            startTime={routeStartTime}
+            endTime={routeEndTime}
           />
 
-          <RoutieCreator
+          <RouteCreator
             selectedPlaces={selectedPlaces}
             purposes={purposes}
-            onSaveRoutie={handleSaveRoutie}
+            onSaveRoute={handleSaveRoute}
           />
         </div>
       </div>

@@ -7,7 +7,7 @@ import { Plus, Map, Clock, Users } from 'lucide-react';
 const Home = () => {
   const navigate = useNavigate();
 
-  const handleCreateRoutie = () => {
+  const handleCreateRoute = () => {
     navigate('/planner');
   };
 
@@ -28,7 +28,7 @@ const Home = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            나만의 여행 루티를 만들어보세요
+            나만의 여행 동선을 만들어보세요
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             목적별 장소를 연결하고, 시간을 최적화한 완벽한 동선 계획을 세워보세요.
@@ -38,12 +38,12 @@ const Home = () => {
         {/* CTA Section */}
         <div className="text-center mb-16">
           <Button
-            onClick={handleCreateRoutie}
+            onClick={handleCreateRoute}
             size="lg"
             className="text-lg px-8 py-4 h-auto"
           >
             <Plus className="w-6 h-6 mr-2" />
-            새 루티 만들기
+            새 동선 만들기
           </Button>
         </div>
 
@@ -117,8 +117,8 @@ const Home = () => {
               <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-sm font-bold">
                 4
               </div>
-              <h4 className="font-medium mb-2">루티 저장</h4>
-              <p className="text-sm text-gray-600">완성된 루티를 저장하고 공유하세요</p>
+              <h4 className="font-medium mb-2">동선 저장</h4>
+              <p className="text-sm text-gray-600">완성된 동선을 저장하고 공유하세요</p>
             </div>
           </div>
         </div>
