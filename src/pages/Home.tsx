@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Map, Clock, Users } from 'lucide-react';
+import { Plus, Map, Users } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ const Home = () => {
             나만의 여행 동선을 만들어보세요
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            목적별 장소를 연결하고, 시간을 최적화한 완벽한 동선 계획을 세워보세요.
+            목적별 장소를 연결해 나만의 동선을 계획하세요.
           </p>
         </div>
 
@@ -48,7 +48,7 @@ const Home = () => {
         </div>
 
         {/* Features */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
           <Card className="text-center">
             <CardHeader>
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -57,18 +57,6 @@ const Home = () => {
               <CardTitle>지도 기반 계획</CardTitle>
               <CardDescription>
                 지도에서 직접 장소를 선택하고 동선을 확인하세요
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="text-center">
-            <CardHeader>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-6 h-6 text-green-600" />
-              </div>
-              <CardTitle>시간 최적화</CardTitle>
-              <CardDescription>
-                영업시간과 체류시간을 고려한 실현 가능한 일정을 만들어요
               </CardDescription>
             </CardHeader>
           </Card>
@@ -110,8 +98,8 @@ const Home = () => {
               <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-sm font-bold">
                 3
               </div>
-              <h4 className="font-medium mb-2">동선 최적화</h4>
-              <p className="text-sm text-gray-600">방문 순서를 조정하고 시간을 확인하세요</p>
+              <h4 className="font-medium mb-2">동선 정리</h4>
+              <p className="text-sm text-gray-600">방문 순서를 조정해보세요</p>
             </div>
             <div className="text-center">
               <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-sm font-bold">
