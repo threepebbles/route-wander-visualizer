@@ -51,11 +51,4 @@ export interface Route {
   createdAt: Date;
 }
 
-export interface ScheduleValidation {
-  isValid: boolean;
-  issues: Array<{
-    type: 'break_time' | 'closed' | 'insufficient_time' | 'overlap';
-    placeIndex: number;
-    message: string;
-  }>;
-}
+// Removed schedule validation types

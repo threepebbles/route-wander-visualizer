@@ -5,7 +5,6 @@ import { RouteList } from '@/components/route/RouteList';
 import { PlaceSelectionModal } from '@/components/place/PlaceSelectionModal';
 import { CategoryModal } from '@/components/category/CategoryModal';
 import { RouteCreator } from '@/components/routie/RouteCreator';
-import { ScheduleValidator } from '@/components/schedule/ScheduleValidator';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Purpose, Place, SelectedPlace, PurposeSelection, Route } from '@/types';
@@ -20,8 +19,6 @@ const Index = () => {
   const [showPlaceModal, setShowPlaceModal] = useState(false);
   const [selectedPurposeForPlaces, setSelectedPurposeForPlaces] = useState<string | null>(null);
   const [purposeSelections, setPurposeSelections] = useState<PurposeSelection[]>([]);
-  const [routeStartTime, setRouteStartTime] = useState('');
-  const [routeEndTime, setRouteEndTime] = useState('');
   const { toast } = useToast();
 
   const handleAddPurpose = (purpose: Omit<Purpose, 'id'>) => {
@@ -143,12 +140,6 @@ const Index = () => {
             onReorder={handleReorderPlaces}
             onRemove={handleRemovePlace}
             onClearAll={handleClearAll}
-          />
-
-          <ScheduleValidator
-            selectedPlaces={selectedPlaces}
-            startTime={routeStartTime}
-            endTime={routeEndTime}
           />
 
           <RouteCreator
